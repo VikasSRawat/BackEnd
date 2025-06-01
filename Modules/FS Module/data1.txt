@@ -1,0 +1,3 @@
+This is data to be written synchrnously 3
+Now I am appending new data
+Now I am appending new data2
