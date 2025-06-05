@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>URL Shortener</h1>
+    <form action="/shorten" method="post" id="form">
+      <label for="url">Enter the URL you want to short</label>
+      <br />
+      <input type="text" name="url" />
+      <br />
+      <button type="submit" name="submit">Submit</button>
+    </form>
+  </body>
+  <script>
+    const form = document.getElementById("form");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target)
+      const url = formData.get("url");
+        console.log(url)
+      const response = await fetch("/shorten", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+
+      const result = await response.text();
+      console.log("Shortened URL:", result);
+    });
+  </script>
+</html>
