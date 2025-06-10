@@ -1,5 +1,5 @@
 //! Creating an Express app 
-
+import path from 'path';
 import express from 'express';
 const app = express();
 
@@ -15,36 +15,33 @@ import {PORT} from "./env.js";
 //* Configure Middleware - app.use()
 //* Start the server - app.listen()
 app.get("/",(req,res)=>{ //* routing for the home page
-    return res.send("Hello stuupid world!")
+    //? console.log(__dirname);
+    //? console.log(__filename);
+    //* The above 2 don't work in ES Modules
+    
+    console.log(import.meta.dirname); //* This will give the directory name
+    console.log(import.meta.url); //* This will give the complete filepath and name
+    
+    return res.send("Hi");
 })
 app.get("/about",(req,res)=>{
     return res.send(`<h1>This is the about page</h1>`)
 })
-app.get("/urlform",(req,res)=>{
-    return res.send(`<div class="container">
-      <h1>URL Shortener</h1>
-      <form id="shorten-form">
-        <div>
-          <label for="url">Enter URL:</label>
-          <input
-            type="url"
-            id="url"
-            name="url"
-            placeholder="https://example.com"
-            required
-          />
-        </div>
-        <div>
-          <label for="shortCode">Enter shortCode:</label>
-          <input type="text" id="shortCode" name="shortCode" />
-        </div>
-        <button type="submit">Shorten</button>
-      </form>
 
-      <h2>Shorten URLs</h2>
-      <ul id="shortened-urls"></ul>
-    </div>`)
+//* Another way to send a file using the path's file name and directory
+app.get("/URLShort",(req,res)=>{
+  console.log(import.meta.dirname)
+  const filepath = path.join(import.meta.dirname,"public","index.html");
+  res.sendFile(filepath) //* Note for Sendfile, the path file should be absolute i.e., even though app.js and public are in the same level of Express directory, it still needs the absolute path
+});
+
+//* Seperately defined for sending the CSS file
+app.get("/style.css",(req,res)=>{
+  const filepath = path.join(import.meta.dirname,"public","style.css");
+  res.sendFile(filepath);
 })
+
+
 
 
 //* Similar to nodejs we are starting the server and listening at the specified port
