@@ -7,6 +7,8 @@ const app = express();
 
 app.use("/public",express.static(staticPath));
 
+
+//! Route Parameters
 app.get("/profile/:username",(req,res)=>{
  //* The colon is only there to signify that this is the dynamic parameter and is actually not present in the URL
 //*  Without the colon, Express treats it as a fixed word.
@@ -25,6 +27,9 @@ app.get("/profile/:username/article/:slug",(req,res)=>{
 })
 
 //* Note if the path contains spaces, then the url will automatically fill it with % symbol and here it will show the space normally
+
+
+
 
 app.listen(3000,()=>{
     console.log("Listening");
