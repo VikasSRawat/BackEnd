@@ -43,7 +43,7 @@ export const getShortenerpage = async (req, res) => {
   }
 };
 
-export const getShortCode = async (req,res)=>{
+export const redirecttoShortLink = async (req,res)=>{
   try{
     const {shortCode} = req.params;
     const links = await loadLinks();
