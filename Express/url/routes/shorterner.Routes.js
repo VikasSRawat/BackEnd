@@ -40,6 +40,7 @@ const router = express.Router();
 
 
 router.get("/",getShortenerpage);
+//* Redefined the below home page in getShortenerpage
 //? router.get("/", async (req, res) => {
 //?   try {
 //?     const file = await readFile(path.join("views", "index.html"),"utf-8");

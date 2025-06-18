@@ -3,7 +3,7 @@ import path from 'path';
 const app = express();
 
 
-//! Form Submission in app.js
+//! Form Submission in app2.js
 const staticPath = path.join(import.meta.dirname, "public1");
 app.use("/",express.static(staticPath));
 

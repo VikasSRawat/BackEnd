@@ -1,7 +1,5 @@
 import crypto from 'crypto';
 import { loadLinks,saveLinks } from '../model/shortener.model.js';
-import { readFile } from 'fs/promises';
-import path from 'path';
 
 export const postURLShorterner = async (req, res) => {
   try {
@@ -25,18 +23,20 @@ export const postURLShorterner = async (req, res) => {
 
 export const getShortenerpage = async (req, res) => {
   try {
-    const file = await readFile(path.join("views", "index.html"),"utf-8");
+    // const file = await readFile(path.join("views", "index.html"),"utf-8");
     const links = await loadLinks();
 
-    const content = file.toString().replaceAll(
-      "{{shortened-urls}}",
-      Object.entries(links).map(
-        ([shortCode, url]) =>
-          `<li><a href="/${shortCode}" target="_blank">${req.host}/${shortCode}</a></li>`
-      )
-      .join(" ")
-    );
-    return res.send(content);
+    //* Replacing the below code with EJS partials
+      //?  const content  = file.toString().replaceAll(
+      //? "{{shortened-urls}}",
+      //? Object.entries(links)
+      //? .map(([shortCode, url]) =>{
+      //?     url = url.length >= 30?`${url.slice(0,30)}...` : url,  
+      //?      `<li><a href="/${shortCode}" target="_blank">${req.host}/${shortCode}</a></li>`
+      //? }
+      //? )
+      //? .join(" ")  return res.send(content);
+      return res.render("index",{links,hosts : req.host})//* index.ejs will be rendered with links and req.host as partials
   } catch (error) {
     console.error("Error : ",error);
     return res.status(500).send("Internal Server Error");
