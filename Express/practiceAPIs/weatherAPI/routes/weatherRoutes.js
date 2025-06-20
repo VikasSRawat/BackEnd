@@ -1,10 +1,11 @@
 import express from 'express';
-import { getWeatherPage } from '../Controllers/weatherController.js';
+import { getWeatherData, showWeatherPage } from '../Controllers/weatherController.js';
 
 const router = express.Router();
 
+router.get("/",showWeatherPage);
 
-router.get("/",getWeatherPage);
+router.post("/",getWeatherData);
 
 
 export const weatherRoutes = router;

@@ -93,10 +93,7 @@ router.post("/",postURLShorterner);
 //?   try{
 //?     const {shortCode} = req.params;
 //?     const links = await loadLinks();
-
 //?     if(!links[shortCode]) return res.status(404).send("404 Error has occured");
-
-
 //?     return res.redirect(links[shortCode]);
 //?   }
 //?   catch(error){

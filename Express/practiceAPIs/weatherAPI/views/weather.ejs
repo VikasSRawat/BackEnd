@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Weather checker</h1>
+    <form action="/" method = "post">
+        <label for="city">Enter the city of whose weather you want to check</label>
+        <input required type="text" name="city" id="city">
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <br><br>
+    <% if(data) {%>
+        <div>Weather For <%=data.name%></div>
+        <div>Description : <%=data.weather[0].description%></div>
+        <div>Temperature : <%= data.main.temp%></div>
+        <div>visibility : <%= data.visibility%></div>
+    <% } else if(city === "INVALID") { %>
+        <div>Please Enter a valid city name</div>
+    <% }%>
+</body>
+</html>
