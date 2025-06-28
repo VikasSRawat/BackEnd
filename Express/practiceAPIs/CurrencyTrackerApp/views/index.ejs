@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="/convert" method="post">
+        <div>
+            <label >Enter the ammount you want to convert</label>
+            <input type="number" name="amount" id="amount">
+        </div>
+        <div>
+            <label >Enter the base currency</label>
+            <input type="text" name="base_currency">
+        </div>
+        <div>
+            <label >Enter the target currency</label>
+            <input type="text" name="target_currency">
+        </div>
+        
+        <button type="submit">Submit</button>
+    </form>
+
+    <%if(data){%>
+        <h1>The converted Rate is <%=data%></h1>
+    <%}else{%>
+        <h1>Please Enter data for conversion</h1>
+    <%}%>
+
+</body>
+</html>

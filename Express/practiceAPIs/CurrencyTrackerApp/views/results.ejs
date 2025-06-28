@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result</title>
+</head>
+<body>
+    <%if(data){%>
+        <h1>The converted Rate is <%=data%></h1>
+        <h2>The top currencies exchange around the world are : </h2>
+        <% for(let i = 0 ; i < 5 ; i++){ %>
+            <p><%=top_curr[i][0]%> : <%=top_curr[i][1] %></p>
+        <%}%>
+    <%}else{%>
+        <h1>Please Enter data for conversion</h1>
+    <%}%>
+
+    <button><a href="/" style="text-decoration: none;">Go Back to homepage</a></button>
+</body>
+</html>
