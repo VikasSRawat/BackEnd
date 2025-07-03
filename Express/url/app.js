@@ -1,9 +1,14 @@
+import 'dotenv/config';
 import express, { urlencoded } from "express";
 import {shortenerRoutes} from "./routes/shorterner.Routes.js";
+import { env } from './config/env.js';
+
+// console.log(process.env);
+
 
 const app = express();
 
-const PORT = 3002;
+const PORT = env.PORT||3002;
 
 
 app.use(express.static("public"));
