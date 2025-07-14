@@ -1,8 +1,11 @@
 import  express, { urlencoded }  from 'express';
 import dotenv from "dotenv";
 import {shortenerRoutes} from './routes/Shortener.Routes.js';
+import { connectDB } from './config/db.js';
 
 dotenv.config();
+
+connectDB();
 
 const app = express();
 

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Note</title>
+</head>
+<body>
+    <%if(message){%>
+    <div><h3><%=message%></h3></div>
+    <%}%>
+    <form action="/update/<%= encodeURIComponent(note.title) %>" method="post">
+        <label name = "title" id="title" for="title">Title : <%= note.title%></label>
+        <label name = "content" id="content" for="content">Content : <%= note.content%></label>
+
+        <h3>Enter new title if you want to update it</h3>
+        <input type="text" for="newTitle" name="newTitle">
+
+        <h3>Enter new Content if you want to update it</h3>
+        <input type="text" for="newContent" name="newContent">
+        <br>
+        <button>Update</button>
+    </form>
+</body>
+</html>
