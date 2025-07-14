@@ -17,6 +17,13 @@ app.set("view engine","ejs");
 
 app.use("/",NotesRouter);
 
+app.use((req,res,next)=>{
+    res.status(404).render("pageNotFound");
+})
+
+app.use((err,req,res,next)=>{
+    res.status(500).send("Try Again later");
+})
 
 app.listen(PORT,()=>{
     console.log(`Listening at http://localhost:${PORT}`);

@@ -60,18 +60,17 @@ export const deleteNote = async (req, res) => {
   }
 };
 
-export const editNote = async (req, res, message) => {
-  console.log("Coming Here");
-  try {
-    const title = req.params.title;
-    const note = await Note.findOne({ title });
-    console.log("The title you are finding out is ", note);
-    if (!message.length) message = null;
-    res.render("edit", { note, message });
-  } catch (error) {
-    console.error("An error has occured ", error);
-  }
-};
+  export const editNote = async (req, res) => {
+    console.log("Coming Here");
+    try {
+      const title = req.params.title;
+      const note = await Note.findOne({ title });
+      console.log("The title you are finding out is ", note);
+      return res.render("edit", { note, message:null });
+    } catch (error) {
+      console.error("An error has occured ", error);
+    }
+  };
 
 
 //! Updating the Note
@@ -95,21 +94,12 @@ export const updateNote = async (req, res) => {
       if (result) {
         console.log("This title already exists, Please use another title");
         return await returnToEditPage(res,title,"This title already exists, Please enter a new and unique title");
-        // return res.render("edit", {
-        //   note: await Note.findOne({ title: title }),
-        //   message:
-        //     "This title already exists, Please enter a new and unique title",
-        // });
       }
     }
     if (newContent.length) nContent = newContent;
-
-    if (!nTitle.length && !nContent.length) {
+    
+    if (!newTitle.length && !newContent.length) {
       return await returnToEditPage(res,title,"Please Enter at least a new title or a new content\n");
-      // return res.render("edit", {
-      //   note: await Note.findOne({ title }),
-      //   message: "Please Enter at least a new title or a new content\n",
-      // });
     }
     await Note.updateOne(
       { title },

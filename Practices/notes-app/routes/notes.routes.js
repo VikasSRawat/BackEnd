@@ -10,9 +10,10 @@ router.post("/add",addNote);
 
 router.post("/delete/:title",deleteNote);
 
-router.post("/edit/:title",editNote);
+router.get("/edit/:title",editNote);
 
 router.post("/update/:title",updateNote);
+
 
 
 export const NotesRouter = router;
