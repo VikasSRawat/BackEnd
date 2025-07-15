@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 
 const blogModel = new mongoose.Schema({
-    title : {type:String,required:true,unique:true},
+    id: { type: Number, required: true, unique: true },
+    title : {type:String,required:true},
     content:{type:String,required:true},
     author : {type:String,required:true},
+    tags : {type : Array}
 },{
     timestamps:true
 });

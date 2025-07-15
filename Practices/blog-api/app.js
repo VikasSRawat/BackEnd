@@ -1,7 +1,7 @@
-import  express  from 'express';
+import  express, {urlencoded}  from 'express';
 import  dotenv  from 'dotenv';
-import { connectDB } from './config/db';
-import { blogRoutes } from './routes/blog.routes';
+import { connectDB } from './config/db.js';
+import { blogRoutes } from './routes/blog.routes.js';
 
 
 dotenv.config();
@@ -10,6 +10,10 @@ const PORT = process.env.PORT;
 
 connectDB();
 const app = express();
+
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use(blogRoutes);
 
