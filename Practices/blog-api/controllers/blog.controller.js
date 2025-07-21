@@ -12,6 +12,19 @@ export const getAllPosts = async(req,res)=>{
     }
 }
 
+export const getPostByPage = async(req,res)=>{
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+        const posts = await blog.find().skip(skip).limit(limit);
+        res.json({ posts });
+    } catch (error) {
+        console.error("An Error has occured getting the blogs");
+        return res.status(500).send("Error getting the page blogs");
+    }
+}
+
 export const getPostById = async(req,res)=>{
     console.log("Coming here");
     
@@ -47,8 +60,8 @@ export const createPost = async(req,res)=>{
         await newBlog.save();
         return res.status(201).json({ message: "Blog added", blog: newBlog });
     } catch (err) {
-        console.error("Error adding the blogPost");
-        return res.status(500).send("Error Adding the blog");
+        console.error("Error adding the blogPost",err);
+        return res.status(500).send("Error Adding the blog\n"+err);
     }
 }
 
