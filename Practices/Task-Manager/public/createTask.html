@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Task</title>
+</head>
+<body>
+  <h1>Add a task</h1>
+  <form id="taskForm">
+    <label for="id">ID</label>
+    <input type="number" name="id" id="id"><br><br>
+
+    <label for="title">Title</label>
+    <input type="text" name="title" id="title"><br><br>
+
+    <label for="status">Status</label>
+    <input type="text" name="status" id="status"><br><br>
+
+    <label for="description">Description</label>
+    <input type="text" name="description" id="description"><br><br>
+
+    <label for="dueDate">Due Date</label>
+    <input type="date" name="dueDate" id="dueDate"><br><br>
+
+    <label for="priority">Priority</label>
+    <input type="text" name="priority" id="priority"><br><br>
+
+    <label for="tags">Tags</label>
+    <input type="text" name="tags" id="tags"><br><br>
+
+    <label for="completed">Completed</label>
+    <input type="text" name="completed" id="completed"><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("taskForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => {
+        if (key === "completed") {
+          data[key] = value.toLowerCase() === "true";
+        } else if (key === "tags") {
+          data[key] = value.split(",");
+        } else {
+          data[key] = value;
+        }
+      });
+
+      const response = await fetch("/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        alert("Task created successfully!");
+        form.reset();
+      } else {
+        alert("Failed to create task");
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 import { blog } from "../Models/blogs.Model.js"
 
+
+
 export const getAllPosts = async(req,res)=>{
     try {
         const blogs = await blog.find();
@@ -11,6 +13,11 @@ export const getAllPosts = async(req,res)=>{
         return res.status(500).send("Error getting all blogs");
     }
 }
+
+
+
+
+
 
 export const getPostByPage = async(req,res)=>{
     try {
@@ -24,6 +31,9 @@ export const getPostByPage = async(req,res)=>{
         return res.status(500).send("Error getting the page blogs");
     }
 }
+
+
+
 
 export const getPostById = async(req,res)=>{
     console.log("Coming here");
@@ -42,6 +52,9 @@ export const getPostById = async(req,res)=>{
         return res.status(500).send("Error getting the blog by ID");
     }
 }
+
+
+
 
 export const createPost = async(req,res)=>{
     console.log(req.body);
@@ -64,6 +77,8 @@ export const createPost = async(req,res)=>{
         return res.status(500).send("Error Adding the blog\n"+err);
     }
 }
+
+
 
 
 export const updatePost = async(req,res)=>{
@@ -101,6 +116,9 @@ export const updatePost = async(req,res)=>{
         res.status(500).send("Error updating the blog");
     }
 }
+
+
+
 
 export const deletePost = async(req,res)=>{
     const id = req.params.id;

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Task Manager</h1>
+    <a href="createTask.html">add tasks</a>
+    <div id="filters">
+      <input
+        type="text"
+        id="status"
+        name="status"
+        placeholder="status e.g.,(pending)"
+      />
+      <input
+        type="text"
+        id="priority"
+        name="priority"
+        placeholder="priority e.g.,(medium)"
+      />
+      <select name="completed" id="completed">
+        <option value=""></option>
+        <option value="true">true</option>
+        <option value="false">false</option>
+      </select>
+      <input type="text" id="tags" placeholder="Tags (comma separated)" />
+      <button onclick="fetchTasks()">Filter Tasks</button>
+    </div>
+
+    <div id="task-list"></div>
+    <div id="pagination">
+      <button onclick="changePage(-1)">Previous</button>
+      <span id="current-page">1</span>
+      <button onclick="changePage(1)">Next</button>
+    </div>
+    
+    <script src="script.js"></script>
+  </body>
+</html>
