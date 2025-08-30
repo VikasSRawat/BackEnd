@@ -17,8 +17,10 @@ const users = [
   { id: 3, username: "user3", password: "123" },
 ];
 
-app.post("/login", (res, req) => {
-  const { username, password } = req.body;
+app.post("/login", (req, res) => {
+  const {username, password } = req.body;
+  console.log(username);
+  console.log(password);
   const user = users.find(
     (u) => u.username === username && u.password === password
   );
@@ -32,13 +34,14 @@ app.post("/login", (res, req) => {
     expiresIn: "1h",
   });
 
+  
   //* Sending the token back to the user
   res.json({ token });
 });
 
-function authenticateToken(res, req, next) {
-  const authHeader = req.authHeader["authorization"];
-  const token = authHeader.split(" ")[1];
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   //* If there is no token, then send back an error status
   if (!token) {
@@ -52,9 +55,7 @@ function authenticateToken(res, req, next) {
 }
 
 app.get("/dashboard", authenticateToken, (req, res) => {
-  res.json({
-    message: `Welcome ${req.user.username}, this is your dashboard.`,
-  });
+  res.json({ message: `Welcome ${req.user.username}!`, user: req.user });
 });
 
 app.listen(3000, () => {
