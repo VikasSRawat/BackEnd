@@ -5,7 +5,7 @@ const div = (a,b) => {if(b==0) return "infinity";else return a/b;};
 
 // ! Individual exports example
 //module.exports = add; // We are exporting the add function only from this file. 
-//module.exports = div; // Only this export will be counted as the bottom export will be counted as the last
+//module.exports = div; // Only this export will be counted as the bottom export will be counted as the last in individaul exports
 
 
 
