@@ -1,3 +1,5 @@
+//! Try this in online gdb compiler for output
+
 const path = require("path")
 
 console.log(__dirname); // For getting the directory name in which the file is present
