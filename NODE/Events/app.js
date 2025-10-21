@@ -11,15 +11,27 @@ const emitter = new EventEmitter();
 //?    console.log("Hello there");
 //?});
 
+//* We can also have multiple listeners having the same event trigger
+//? emitter.on("greet",()=>{
+//?     console.log("Hi whatsup");
+//? })
+
 //! Emitting the event
 //* This will call the function that is listening to the greet event
-//?emitter.emit("greet");
+//? emitter.emit("greet");
 
 
 //! We can also pass arguments to the event listener
 //? emitter.on("Greet",(name,age)=>{
 //?     console.log(`Hello ${name}, You are ${age} years old`);
 //? });
+
+
+//* It will also listen and trigger even if it does not have any parameters
+//? emitter.on("greet",()=>{
+//?     console.log("Did you call me?");
+//? })
+
 
 //* If no arguments are passed and there are no default value then it will print undefined
 //?emitter.emit("Greet","Vikas Rawat",99);
