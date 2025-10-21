@@ -8,7 +8,7 @@ const PI = 3.14;
 
 
 
-//! Named exports
+//! Named exports, can have multiple exports in the same module/file
 //? export const div = (a,b) => {if(b==0) return "infinity";else return a/b;};
 //? export const add = (a,b) => {return a+b};
 
