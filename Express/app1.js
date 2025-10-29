@@ -12,10 +12,11 @@ app.get("/", (req, res) => {
 //! Route Parameters
 app.get("/profile/:username", (req, res) => {
   //* The colon is only there to signify that this is the dynamic parameter and is actually not present in the URL
-  //*  Without the colon, Express treats it as a fixed word.
-  //* /user/id — matches only if the URL is exactly /user/id
-  //* /user/:id — matches /user/anything
-  console.log(req.params);
+  //* app.get("/profile/:username") ===>   url - http://localhost:3000/profile/vikas hence the params will be vikas
+  //*  Without colon in get, it will cause an error
+  //* app.get('/user/id') — matches only if the URL is exactly /user/id
+  //* app.get('/user/:id') — matches /user/anything
+  console.log(req.params); //* For getting the parameters in the url
   res.end(`<h1>My username is ${req.params.username}</h1>`);
 });
 

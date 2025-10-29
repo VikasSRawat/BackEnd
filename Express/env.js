@@ -15,7 +15,7 @@ console.log(ageSchema.parse(34)); //* The output will be 34
 
 
 //? const parsedUserAge = ageSchema.parse(9);
-//? console.log(parsedUserAge);//* Whereas this will give you the error.
+//? console.log(parsedUserAge);//* Whereas this will give you the error as the number is less than the min
 
 //* Combining with try-catch block method so to give the specific error
 
