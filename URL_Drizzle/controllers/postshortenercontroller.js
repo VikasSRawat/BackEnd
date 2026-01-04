@@ -48,3 +48,7 @@ export const redirecttoShortLink = async (req,res)=>{
     return res.status(500).send("Internal Server Error");
   }
 }
+
+export const getHello = async(req,res)=>{
+  return res.send("Hello")
+}
