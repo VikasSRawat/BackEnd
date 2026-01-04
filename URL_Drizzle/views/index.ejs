@@ -35,7 +35,7 @@
         <!-- {{shortened-urls}} -->
 
         <% links.map(({shortCode,url})=>{ %> <% const
-        truncatedUrl = url.length >= 30? `${url.slice(0,30)}...` : url%>
+        truncatedUrl = url.length >= 20? `${url.slice(0,30)}...` : url%>
         <li>
           <a href="/<%= shortCode %>" target="_blank">
             <%= hosts %> / <%= shortCode %>

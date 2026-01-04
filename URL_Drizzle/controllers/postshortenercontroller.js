@@ -4,20 +4,14 @@ import { loadLinks, saveLinks, getLinkByShortCode } from '../services/shorterner
 export const postURLShorterner = async (req, res) => {
   try {
     const { url, shortCode } = req.body;
-    console.log(url);
-    // console.log(shortCode);
     const finalshortCode = shortCode || crypto.randomBytes(4).toString("hex");
-    // console.log(finalshortCode)
     const links = await loadLinks();
 
     if (links[finalshortCode]) {
-      return res
-        .status(400)
-        .send("Short code already exists. Please choose a different one.");
+     return res.redirect(
+        "/?error=shortcode_exists&message=Short code already exists"
+      );
     }
-    // links[finalshortCode] = url;
-    // await saveLinks(links);
-
     await saveLinks({url,shortCode});
     return res.redirect("/");
   } catch (error) {
@@ -29,7 +23,7 @@ export const getShortenerpage = async (req, res) => {
   try {
     //? const file = await readFile(path.join("views", "index.html"),"utf-8");
    const links = await loadLinks();
-    console.log(links);
+    // console.log(links);
       return res.render("index",{links,hosts : req.host})//* index.ejs will be rendered with links and req.host as partials
   } catch (error) {
     console.error("Error : ",error);

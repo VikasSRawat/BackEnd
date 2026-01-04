@@ -1,7 +1,8 @@
 import express, { urlencoded } from "express";
 import {shortenerRoutes} from "./routes/shorterner.Routes.js";
+import { authRoute } from "./routes/auth.Routes.js";
 import 'dotenv/config';
-// console.log(process.env);
+
 
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.static("public"));
 app.use(urlencoded({extended:true}));
 
 app.use(shortenerRoutes);
+app.use(authRoute);
 
 app.set("view engine","ejs");
 //? app.set("views","ejs"); //* If we need to define where the template folder will be custom
