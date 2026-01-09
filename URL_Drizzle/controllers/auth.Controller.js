@@ -1,3 +1,5 @@
+import { getUserByEmail, createUser } from "../services/auth.services.js";
+
 export const getRegisterPage = (req,res)=>{
     console.log("getRegisterPage hit")
     return res.render("../views/auth/register",{errors:[]});
@@ -14,3 +16,15 @@ export const postLogin = (req,res)=>{
     res.cookie("isLoggedIn",true);
     res.redirect("/");
 };
+
+export const postRegister = async(req,res)=>{
+    console.log(req.body);
+    const {name,email,password} = req.body;
+    const userExists = await getUserByEmail(email);
+    if(userExists) {return res.redirect("/register");}
+
+    const [user] = await createUser({name,email,password});
+
+    console.log(user);
+    res.redirect("/login")
+}
