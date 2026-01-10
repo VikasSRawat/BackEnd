@@ -1,4 +1,4 @@
-import { getUserByEmail, createUser } from "../services/auth.services.js";
+import { getUserByEmail, createUser, passwordMatch } from "../services/auth.services.js";
 
 export const getRegisterPage = (req,res)=>{
     console.log("getRegisterPage hit")
@@ -11,10 +11,16 @@ export const getLoginPage = (req,res)=>{
 }
 
 export const postLogin = (req,res)=>{
-    //? res.setHeader("Set-Cookie", "isLoggedIn = true; path=/;");
-    //* With Cookie-parser middleware, we can just define the key value pairs for the cookie and express automatically sets the path to / by default
-    res.cookie("isLoggedIn",true);
-    res.redirect("/");
+    const {email,password} = req.body;
+    const userExists = getUserByEmail({email});
+    if(userExists){
+        const pass = passwordMatch({email,password});
+        if(pass)
+            console.log("Passed");
+        else    
+            console.log("Not Passed");
+    }
+    return res.redirect("/");
 };
 
 export const postRegister = async(req,res)=>{
