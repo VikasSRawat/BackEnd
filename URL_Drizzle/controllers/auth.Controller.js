@@ -18,10 +18,14 @@ export const postLogin = (req,res)=>{
 };
 
 export const postRegister = async(req,res)=>{
-    console.log(req.body);
+    // console.log(req.body);
     const {name,email,password} = req.body;
-    const userExists = await getUserByEmail(email);
-    if(userExists) {return res.redirect("/register");}
+    const userExists = await getUserByEmail({email});
+    if(userExists) {
+        console.log("User Exists");
+        console.log(userExists)
+        return res.redirect("/register");
+    }
 
     const [user] = await createUser({name,email,password});
 
