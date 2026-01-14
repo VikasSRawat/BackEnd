@@ -1,4 +1,4 @@
-import { getUserByEmail, createUser, hashPasswod, comparePassword } from "../services/auth.services.js";
+import {generateToken, getUserByEmail, createUser, hashPasswod, comparePassword } from "../services/auth.services.js";
 
 export const getRegisterPage = (req,res)=>{
     // console.log("getRegisterPage hit")
@@ -23,8 +23,15 @@ export const postLogin = async (req,res)=>{
         console.log("Wrong password");
         return res.redirect("/login")
     }
-    res.cookie("isLoggedIn",true);
-    console.log("Logged In");
+    // res.cookie("isLoggedIn",true);
+    // console.log("Logged In");
+    const token = generateToken({
+        id: user.id,
+        name : user.name,
+        email : user.email
+    });
+
+    res.cookie("access_token",token);
     return res.redirect("/");
 };
 
