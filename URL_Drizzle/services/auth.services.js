@@ -24,3 +24,7 @@ export const createUser = async({name,email,password})=>{
 export const generateToken = async({id,email,name})=>{
     return jwt.sign({id,name,email},process.env.JWT_SECRET,{expiresIn:"30d"})
 }
+
+export const verifyJWTToken=(token)=>{
+    return jwt.verify(token,process.env.JWT_SECRET);
+}
