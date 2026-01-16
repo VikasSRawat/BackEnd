@@ -9,10 +9,11 @@ export const verifyAuthentication = (req,res,next)=>{
     try {
         const decodedToken = verifyJWTToken(token);
         req.user = decodedToken;
+        console.log(`req.user:`, req.user);
     } catch (error) {
-        req.user = NULL;
-        return next();
+        req.user = null;
     }
+    return next();
 }
 
 

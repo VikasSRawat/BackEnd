@@ -14,15 +14,15 @@ const PORT = process.env.PORT||3002;
 app.use(express.static("public"));
 app.use(urlencoded({extended:true}));
 
-// app.use((req, res, next) => {
-//   res.locals.user = null; // until auth is implemented
-//   next();
-// });
-app.use(verifyAuthentication);
+app.use((req, res, next) => {
+  res.locals.user = req.user; // until auth is implemented
+  next();
+});
 
 app.use(cookieParser());
 app.use(authRoute);
 app.use(shortenerRoutes);
+app.use(verifyAuthentication);
 
 app.set("view engine","ejs");
 //? app.set("views","ejs"); //* If we need to define where the template folder will be custom

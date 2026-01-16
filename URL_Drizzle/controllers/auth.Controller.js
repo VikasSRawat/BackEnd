@@ -2,16 +2,21 @@ import {generateToken, getUserByEmail, createUser, hashPasswod, comparePassword 
 
 export const getRegisterPage = (req,res)=>{
     // console.log("getRegisterPage hit")
+    if (req.user) return res.redirect("/");
     return res.render("../views/auth/register",{errors:[]});
 }
 
 export const getLoginPage = (req,res)=>{
+    if (req.user) return res.redirect("/");
+
     //? console.log("getLoginPage hit")
     return res.render("../views/auth/login",{errors:[]}) //* This will also work
 }
 
 export const postLogin = async (req,res)=>{
     const {email,password} = req.body;
+    console.log(email);
+    console.log(password);
     const user = await getUserByEmail({email});
     if(!user){
         console.log("User does not exist");
@@ -23,8 +28,8 @@ export const postLogin = async (req,res)=>{
         console.log("Wrong password");
         return res.redirect("/login")
     }
-    // res.cookie("isLoggedIn",true);
-    // console.log("Logged In");
+
+    console.log("Correct password");
     const token = generateToken({
         id: user.id,
         name : user.name,
@@ -36,6 +41,8 @@ export const postLogin = async (req,res)=>{
 };
 
 export const postRegister = async(req,res)=>{
+    if (req.user) return res.redirect("/");
+
     // console.log(req.body);
     const {name,email,password} = req.body;
     const userExists = await getUserByEmail({email});
