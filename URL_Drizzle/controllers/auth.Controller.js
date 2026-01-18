@@ -15,8 +15,8 @@ export const getLoginPage = (req,res)=>{
 
 export const postLogin = async (req,res)=>{
     const {email,password} = req.body;
-    console.log(email);
-    console.log(password);
+    // console.log(email);
+    // console.log(password);
     const user = await getUserByEmail({email});
     if(!user){
         console.log("User does not exist");
@@ -36,7 +36,8 @@ export const postLogin = async (req,res)=>{
         email : user.email
     });
 
-    res.cookie("access_token",token);
+    console.log("token in auth.controller",typeof(token));
+    res.cookie("access_token",token,{path:"/"});
     return res.redirect("/");
 };
 

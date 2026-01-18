@@ -1,16 +1,20 @@
+import { verifyJWTToken } from "../services/auth.services.js";
+
 export const verifyAuthentication = (req,res,next)=>{
-    console.log(req.cookies);
+    //? console.log(`The cookies are : `,req.cookies);
     const token = req.cookies.access_token;
+    //? console.log("Token = ",token);
     if(!token){
         req.user = null;
         return next();
     }
-    
     try {
         const decodedToken = verifyJWTToken(token);
         req.user = decodedToken;
+        console.log("In here")
         console.log(`req.user:`, req.user);
     } catch (error) {
+        console.log("Failing to set req.user value")
         req.user = null;
     }
     return next();

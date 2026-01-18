@@ -21,7 +21,7 @@ export const createUser = async({name,email,password})=>{
     return await db.insert(usersTable).values({name,email,password}).$returningId();
 }
 
-export const generateToken = async({id,email,name})=>{
+export const generateToken = ({id,email,name})=>{
     return jwt.sign({id,name,email},process.env.JWT_SECRET,{expiresIn:"30d"})
 }
 
