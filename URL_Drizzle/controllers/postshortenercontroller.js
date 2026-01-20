@@ -23,15 +23,8 @@ export const postURLShorterner = async (req, res) => {
 export const getShortenerpage = async (req, res) => {
   try {
     //? const file = await readFile(path.join("views", "index.html"),"utf-8");
-   const links = await loadLinks();
-  //?  let cookievalue = req.headers.cookie;
-  //?  let isLoggedIn = Boolean(cookievalue?.split(";").find((cookie)=>cookie.trim().startsWith("isLoggedIn"))?.split("=")[1]);
-  //?  console.log(typeof(isLoggedIn))
-  //?  console.log(isLoggedIn);
-   let isLoggedIn = req.cookies.isLoggedIn;
-  //?  console.log(isLoggedIn);
-  //?  console.log(links);
-      return res.render("index",{links,hosts : req.host, isLoggedIn})//* index.ejs will be rendered with links and req.host as partials
+      const links = await loadLinks();
+      return res.render("index",{links,hosts : req.host})//* index.ejs will be rendered with links and req.host as partials
   } catch (error) {
     console.error("Error : ",error);
     return res.status(500).send("Internal Server Error");
