@@ -1,6 +1,7 @@
 import { verifyJWTToken } from "../services/auth.services.js";
 
 export const verifyAuthentication = (req,res,next)=>{
+    console.log("Here in verifyAuthentication");
     //? console.log(`The cookies are : `,req.cookies);
     const token = req.cookies.access_token;
     //? console.log("Token = ",token);

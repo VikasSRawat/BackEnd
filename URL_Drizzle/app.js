@@ -22,10 +22,11 @@ app.use(cookieParser());
 
 //* First we set the cookie and then use the session
 app.use(session({secret:"my-secret",resave:true, saveUninitialized:false}));
-app.use(flash);
+app.use(flash());
 
 app.use(verifyAuthentication);
 app.use((req, res, next) => {
+  console.log("Here in app.js");
   res.locals.user = req.user || null;
   next();
 });

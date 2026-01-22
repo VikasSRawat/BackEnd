@@ -10,9 +10,9 @@ router.get("/",getShortenerpage);
 
 router.post("/",postURLShorterner);
 
-router.get("/:shortCode",redirecttoShortLink);
-
 router.get("/hello",getHello);
+
+router.get("/:shortCode",redirecttoShortLink);
 
 //* Best export used in real life projects will be named exports
 //* Named Export

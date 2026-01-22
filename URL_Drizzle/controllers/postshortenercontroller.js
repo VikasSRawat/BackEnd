@@ -39,7 +39,7 @@ export const redirecttoShortLink = async (req,res)=>{
 
 
     // if(!links[shortCode]) return res.status(404).send("404 Error has occured");
-    if(!link) return res.status(400).send("404 Error has occured");
+    if(!link) return res.status(404).send("404 Error has occured");
 
     return res.redirect(link.url);
   }
