@@ -9,6 +9,7 @@ export const postURLShorterner = async (req, res) => {
     const links = await loadLinks();
 
     if (links[finalshortCode]) {
+      req.flash("Errors","This shortcode already exists, please try with a new one");
      return res.redirect(
         "/?error=shortcode_exists&message=Short code already exists"
       );
@@ -24,7 +25,7 @@ export const getShortenerpage = async (req, res) => {
   try {
     //? const file = await readFile(path.join("views", "index.html"),"utf-8");
       const links = await loadLinks();
-      return res.render("index",{links,hosts : req.host})//* index.ejs will be rendered with links and req.host as partials
+      return res.render("index",{links,hosts : req.host},{errors:req.flash("errors")})//* index.ejs will be rendered with links and req.host as partials
   } catch (error) {
     console.error("Error : ",error);
     return res.status(500).send("Internal Server Error");

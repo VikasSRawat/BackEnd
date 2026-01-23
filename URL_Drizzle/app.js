@@ -26,7 +26,7 @@ app.use(flash());
 
 app.use(verifyAuthentication);
 app.use((req, res, next) => {
-  console.log("Here in app.js");
+  //? console.log("Here in app.js");
   res.locals.user = req.user || null;
   next();
 });

@@ -10,7 +10,7 @@ export const getLoginPage = (req,res)=>{
     if (req.user) return res.redirect("/");
 
     //? console.log("getLoginPage hit")
-    return res.render("../views/auth/login",{errors:[]}) //* This will also work
+    return res.render("../views/auth/login",{errors:req.flash("errors")}) //* This will also work
 }
 
 export const postLogin = async (req,res)=>{
@@ -37,7 +37,7 @@ export const postLogin = async (req,res)=>{
         email : user.email
     });
 
-    console.log("token in auth.controller",typeof(token));
+    //? console.log("token in auth.controller",typeof(token));
     res.cookie("access_token",token,{path:"/"});
     return res.redirect("/");
 };
@@ -48,12 +48,13 @@ export const postRegister = async(req,res)=>{
     // console.log(req.body);
     const {name,email,password} = req.body;
     const userExists = await getUserByEmail({email});
+    console.log(userExists);
     if(userExists) {
         //? console.log("User Exists");
         //? console.log(userExists)
         //? return res.redirect("/");
         req.flash("errors","User Already Exists");
-        res.redirect("/");
+        return res.redirect("/register");
     }
     const hashedPassword = await hashPasswod(password);
     const [user] = await createUser({name,email,password:hashedPassword});
