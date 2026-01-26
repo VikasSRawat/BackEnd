@@ -14,7 +14,7 @@ export const postURLShorterner = async (req, res) => {
         "/?error=shortcode_exists&message=Short code already exists"
       );
     }
-    await saveLinks({url,shortCode});
+    await saveLinks({url,shortCode,id:req.user.id});
     return res.redirect("/");
   } catch (error) {
     console.error("An error has occured here in postURLShortener controller ",error);
@@ -23,9 +23,11 @@ export const postURLShorterner = async (req, res) => {
 
 export const getShortenerpage = async (req, res) => {
   try {
+    if(!req.user)
+      res.redirect("/login");
     //? const file = await readFile(path.join("views", "index.html"),"utf-8");
-      const links = await loadLinks();
-      return res.render("index",{links,hosts : req.host},{errors:req.flash("errors")})//* index.ejs will be rendered with links and req.host as partials
+      const links = await loadLinks(req.user.id);
+      return res.render("index",{links,hosts : req.host})//* index.ejs will be rendered with links and req.host as partials
   } catch (error) {
     console.error("Error : ",error);
     return res.status(500).send("Internal Server Error");
