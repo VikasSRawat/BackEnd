@@ -1,4 +1,5 @@
 import {generateToken, getUserByEmail, createUser, hashPasswod, comparePassword } from "../services/auth.services.js";
+import { loginUserSchema, registerUserSchema } from "../validators/auth-validator.js";
 
 export const getRegisterPage = (req,res)=>{
     // console.log("getRegisterPage hit")
@@ -15,7 +16,13 @@ export const getLoginPage = (req,res)=>{
 
 export const postLogin = async (req,res)=>{
     //? if(req.user) return res.redirect("/");
-    const {email,password} = req.body;
+    const{data,error} = loginUserSchema.safeParse(req.body);
+    if(error){
+        const error_message = error.issues[0].message;
+        req.flash("errors",error_message);
+        return res.redirect("/login");
+    }
+    const {email,password} = data;
     const user = await getUserByEmail({email});
     if(!user){
         //? console.log("User does not exist");
@@ -45,8 +52,18 @@ export const postLogin = async (req,res)=>{
 export const postRegister = async(req,res)=>{
     if (req.user) return res.redirect("/");
 
-    // console.log(req.body);
-    const {name,email,password} = req.body;
+    //? console.log(req.body);
+    //? const {name,email,password} = req.body;
+    const {data,error} = registerUserSchema.safeParse(req.body);
+    if(error){
+        //? console.log(error);
+        const error_message = error.issues[0].message;
+        req.flash("errors",error_message);
+        return res.redirect("/register");
+    }
+    console.log(data);
+
+    const {name,email,password} = data;
     const userExists = await getUserByEmail({email});
     console.log(userExists);
     if(userExists) {
@@ -59,7 +76,8 @@ export const postRegister = async(req,res)=>{
     const hashedPassword = await hashPasswod(password);
     const [user] = await createUser({name,email,password:hashedPassword});
 
-    console.log(user);
+    //?console.log(user);
+    req.flash("success","User Created Successfully");
     res.redirect("/login")
 }
 
