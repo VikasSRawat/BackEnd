@@ -1,3 +1,4 @@
+import e from "express";
 import { db } from "../config/db.js";
 import { shortLink } from "../drizzle/schema.js";
 import { eq } from "drizzle-orm";
@@ -18,3 +19,12 @@ export const getLinkByShortCode = async (shortCode) => {
 export const saveLinks = async ({ url, shortCode,id }) => {
   await db.insert(shortLink).values({ url: url, shortCode: shortCode,userId : id });
 };
+
+export const findShortLinkById = async(id)=>{
+  const [result] = await db.select().from(shortLink).where(eq(shortLink.id,id));
+  return result;
+}
+
+export const deleteShortLinkById = async(id)=>{
+  await db.delete(shortLink).where(eq(shortLink.id,id));
+}
