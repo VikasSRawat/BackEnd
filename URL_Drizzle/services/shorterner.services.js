@@ -28,3 +28,14 @@ export const findShortLinkById = async(id)=>{
 export const deleteShortLinkById = async(id)=>{
   await db.delete(shortLink).where(eq(shortLink.id,id));
 }
+
+export const getShortCode = async(shortCode) =>{
+  const [result] = await db.select().from(shortLink).where(eq(shortLink.shortCode,shortCode));
+  return result;
+}
+
+export const updateshortLink = async({url,shortCode,id})=>{
+  console.log("Inside the updateShortLinkService");
+  console.log(url,shortCode,id);
+  await db.update(shortLink).set({url:url,shortCode:shortCode}).where(eq(shortLink.id,id));
+}

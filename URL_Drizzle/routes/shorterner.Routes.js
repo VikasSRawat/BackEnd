@@ -1,7 +1,7 @@
 //! Using express.router and just changing everything from app.get() or app.post to router.get() and router.post()
 
 import express from "express";
-import {postURLShorterner,getShortenerpage,redirecttoShortLink,getHello, getEditShorternerPage, deleteShortLink} from '../controllers/postshortenercontroller.js'
+import {postURLShorterner,getShortenerpage,redirecttoShortLink,getHello, getEditShorternerPage, deleteShortLink, editShortLink} from '../controllers/postshortenercontroller.js'
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.get("/hello",getHello);
 
 router.get("/:shortCode",redirecttoShortLink);
 
-router.route("/edit/:id").get(getEditShorternerPage);
+router.route("/edit/:id").get(getEditShorternerPage).post(editShortLink);
 
 router.route("/delete/:id").post(deleteShortLink);
 
