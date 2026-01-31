@@ -37,7 +37,7 @@ export const getShortenerpage = async (req, res) => {
   try {
     if (!req.user) res.redirect("/login");
     const links = await loadLinks(req.user.id);
-    return res.render("index", { links, host: req.host, errors: req.flash() }); //* index.ejs will be rendered with links and req.host as partials
+    return res.render("index", { links, host: req.host, errors: req.flash("errors") }); //* index.ejs will be rendered with links and req.host as partials
   } catch (error) {
     console.error("Error : ", error);
     return res.status(500).send("Internal Server Error");
@@ -86,19 +86,16 @@ export const editShortLink = async(req,res)=>{
     req.flash("errors",error_message);
     return res.redirect("/");
   }
-  // console.log(data);
-  // console.log(req.params);
-
   const {url,shortCode} = data;
   const id = req.params.id;
-  console.log(data);
-  console.log(id);
-  const shortCodeExists = getShortCode(shortCode);
+  const shortCodeExists = await getShortCode(shortCode);
   if(shortCodeExists){
+    console.log("ShortCode Exists");
     req.flash("errors","This shortCode already exists, Please enter a new unique one");
     return res.redirect("/");
   }
   await updateshortLink({url,shortCode,id});
+  return res.redirect("/");
 }
 
 export const deleteShortLink = async(req,res)=>{

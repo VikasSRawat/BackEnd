@@ -30,7 +30,9 @@ export const deleteShortLinkById = async(id)=>{
 }
 
 export const getShortCode = async(shortCode) =>{
+  console.log(shortCode);
   const [result] = await db.select().from(shortLink).where(eq(shortLink.shortCode,shortCode));
+  console.log("result = ",result);
   return result;
 }
 
