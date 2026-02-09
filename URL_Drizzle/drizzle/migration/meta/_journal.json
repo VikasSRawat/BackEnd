@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1767438353848,
-      "tag": "0000_nasty_thing",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1767791882815,
-      "tag": "0001_salty_the_renegades",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1769411394064,
-      "tag": "0002_bizarre_marvel_zombies",
+      "when": 1770098457599,
+      "tag": "0000_abandoned_proudstar",
       "breakpoints": true
     }
   ]

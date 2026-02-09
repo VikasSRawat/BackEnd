@@ -1,10 +1,7 @@
 import { verifyJWTToken } from "../services/auth.services.js";
 
 export const verifyAuthentication = (req,res,next)=>{
-    //? console.log("Here in verifyAuthentication");
-    //? console.log(`The cookies are : `,req.cookies);
     const token = req.cookies.access_token;
-    //? console.log("Token = ",token);
     if(!token){
         req.user = null;
         return next();
@@ -12,10 +9,9 @@ export const verifyAuthentication = (req,res,next)=>{
     try {
         const decodedToken = verifyJWTToken(token);
         req.user = decodedToken;
-        console.log("In here")
-        console.log(`req.user:`, req.user);
+        console.log(`setting value for req.user in auth middleware :`, req.user);
     } catch (error) {
-        console.log("Failing to set req.user value")
+        console.log("Failing to set req.user value ",error);
         req.user = null;
     }
     return next();

@@ -1,11 +1,13 @@
+import cookieParser from "cookie-parser";
+import 'dotenv/config';
 import express, { urlencoded } from "express";
+import flash from "connect-flash";
+import requestIp from "request-ip"
+import session from "express-session";
+
 import {shortenerRoutes} from "./routes/shorterner.Routes.js";
 import { authRoute } from "./routes/auth.Routes.js";
-import 'dotenv/config';
-import cookieParser from "cookie-parser";
 import { verifyAuthentication } from "./middlewares/verify-auth-middleware.js";
-import flash from "connect-flash";
-import session from "express-session";
 
 
 const app = express();
@@ -24,6 +26,7 @@ app.use(cookieParser());
 app.use(session({secret:"my-secret",resave:true, saveUninitialized:false}));
 app.use(flash());
 
+app.use(requestIp.mw()); //* Middleware for requesting client ip from anywhere
 app.use(verifyAuthentication);
 app.use((req, res, next) => {
   //? console.log("Here in app.js");
