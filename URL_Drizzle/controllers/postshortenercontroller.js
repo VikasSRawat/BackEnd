@@ -35,6 +35,7 @@ export const postURLShorterner = async (req, res) => {
 
 export const getShortenerpage = async (req, res) => {
   try {
+    console.log('req.user in getShortenerPage is ',req.user);
     if (!req.user) res.redirect("/login");
     const links = await loadLinks(req.user.id);
     return res.render("index", { links, host: req.host, errors: req.flash("errors") }); //* index.ejs will be rendered with links and req.host as partials

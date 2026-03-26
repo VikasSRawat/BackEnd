@@ -11,6 +11,8 @@ import {
   comparePassword,
   createRefreshToken,
   createAccessToken,
+  clearUserSession,
+  authenticateUser,
 } from "../services/auth.services.js";
 import {
   loginUserSchema,
@@ -52,43 +54,18 @@ export const postLogin = async (req, res) => {
     return res.redirect("/login");
   }
 
-  // console.log("Correct password");
-  // const token = generateToken({
-  //     id: user.id,
-  //     name : user.name,
-  //     email : user.email
-  // });
+  //? console.log("Correct password");
+  //? const token = generateToken({
+  //?     id: user.id,
+  //?     name : user.name,
+  //?     email : user.email
+  //? });
 
   //? console.log("token in auth.controller",typeof(token));
   // res.cookie("access_token",token,{path:"/"});
 
   //* Creating a session
-  const session = await createSession(user.id, {
-    ip: req.clientIp,
-    userAgent: req.headers["user-agent"],
-  });
-
-  const accessToken = await createAccessToken({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    sessionId: session.id,
-  });
-  const refreshToken = await createRefreshToken({
-    id: session.id,
-  });
-
-
-  const baseConfig = { httpOnly: true, secure: true};
-  res.cookie("access_token", accessToken, {
-    ...baseConfig,
-    maxAge: ACCESS_TOKEN_EXPIRY,
-  });
-
-  res.cookie("refresh_token", refreshToken, {
-    ...baseConfig,
-    maxAge: REFRESH_TOKEN_EXPIRY,
-  });
+  await authenticateUser({req,res,user});
   return res.redirect("/");
 };
 
@@ -119,9 +96,8 @@ export const postRegister = async (req, res) => {
   const hashedPassword = await hashPasswod(password);
   const [user] = await createUser({ name, email, password: hashedPassword });
 
-  //?console.log(user);
-  req.flash("success", "User Created Successfully");
-  res.redirect("/login");
+  await authenticateUser({req,res,user,name,email});
+  return res.redirect("/");
 };
 
 export const getMe = (req, res) => {
@@ -129,7 +105,12 @@ export const getMe = (req, res) => {
   return res.send(`<h1>Hey ${req.user.name} - ${req.user.email}</h1>`);
 };
 
-export const logoutUser = (req, res) => {
+export const logoutUser = async(req, res) => {
+  //* Also clearing the sessions from the database or else each login will create
+  //* a new seperate session data entry quickly filling the database
+
+  await clearUserSession(req.user.sessionId);
   res.clearCookie("access_token");
+  res.clearCookie("refresh_token");
   res.redirect("/login");
 };
