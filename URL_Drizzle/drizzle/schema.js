@@ -1,5 +1,4 @@
-import { relations } from "drizzle-orm";
-// import { text } from "drizzle-orm/gel-core";
+import { relations,sql } from "drizzle-orm";
 import { int, mysqlTable, timestamp, varchar, boolean,text } from "drizzle-orm/mysql-core";
 
 export const usersTable = mysqlTable("users",{
@@ -7,10 +6,18 @@ export const usersTable = mysqlTable("users",{
     name: varchar({length:255}).notNull(),
     email: varchar({length:255}).notNull().unique(),
     password: varchar({length:255}).notNull(),
+    isEmailValid: boolean("is_email_valid").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull()
 })
 
+export const verifyEmailTokenTable = mysqlTable("is_email_valid",{
+    id: int().autoincrement().primaryKey(),
+    userId: int("user_id").notNull().references(()=>usersTable.id, {onDelete:"cascade"}),
+    token: varchar({length:8}).notNull(),
+    expiresAt: timestamp("expires_at").default(sql`(CURRENT_TIMESTAMP + INTERVAL 1 DAY)`),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+})
 
 export const shortLink = mysqlTable("short_link",{
     id: int().autoincrement().primaryKey(),

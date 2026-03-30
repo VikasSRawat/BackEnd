@@ -8,6 +8,20 @@
       "when": 1770098457599,
       "tag": "0000_abandoned_proudstar",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1774694757997,
+      "tag": "0001_spicy_dorian_gray",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1774863082703,
+      "tag": "0002_nostalgic_tiger_shark",
+      "breakpoints": true
     }
   ]
 }

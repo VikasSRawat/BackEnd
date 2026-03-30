@@ -2,6 +2,7 @@ import {
   ACCESS_TOKEN_EXPIRY,
   REFRESH_TOKEN_EXPIRY,
 } from "../config/constant.js";
+import { sendEmail } from "../lib/nodemailer.js";
 import {
   //   generateToken,
   createSession,
@@ -13,6 +14,11 @@ import {
   createAccessToken,
   clearUserSession,
   authenticateUser,
+  findUserById,
+  getAllShortLinks,
+  insertVerifyEmailToken,
+  createVerifyEmailLink,
+  generateRandomToken,
 } from "../services/auth.services.js";
 import {
   loginUserSchema,
@@ -62,10 +68,10 @@ export const postLogin = async (req, res) => {
   //? });
 
   //? console.log("token in auth.controller",typeof(token));
-  // res.cookie("access_token",token,{path:"/"});
+  //? res.cookie("access_token",token,{path:"/"});
 
   //* Creating a session
-  await authenticateUser({req,res,user});
+  await authenticateUser({ req, res, user });
   return res.redirect("/");
 };
 
@@ -96,7 +102,7 @@ export const postRegister = async (req, res) => {
   const hashedPassword = await hashPasswod(password);
   const [user] = await createUser({ name, email, password: hashedPassword });
 
-  await authenticateUser({req,res,user,name,email});
+  await authenticateUser({ req, res, user, name, email });
   return res.redirect("/");
 };
 
@@ -105,7 +111,7 @@ export const getMe = (req, res) => {
   return res.send(`<h1>Hey ${req.user.name} - ${req.user.email}</h1>`);
 };
 
-export const logoutUser = async(req, res) => {
+export const logoutUser = async (req, res) => {
   //* Also clearing the sessions from the database or else each login will create
   //* a new seperate session data entry quickly filling the database
 
@@ -114,3 +120,60 @@ export const logoutUser = async(req, res) => {
   res.clearCookie("refresh_token");
   res.redirect("/login");
 };
+
+export const getProfilePage = async (req, res) => {
+  if (!req.user) return res.redirect("/login");
+  const user = await findUserById(req.user.id);
+
+  if (!user) return res.redirect("/login");
+
+  const userShortLinks = await getAllShortLinks(user.id);
+  return res.render("auth/profile", {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+      isEmailValid: user.isEmailValid,
+      links: userShortLinks,
+    },
+  });
+};
+
+
+export const getVerifyEmailPage = async(req,res)=>{
+  if(!req.user || req.user.isEmailValid) return res.redirect("/");
+
+  return res.render("../views/auth/verify-email.ejs",{
+    email: req.user.email
+  })
+}
+
+export const resendVerificationLink = async(req,res)=>{
+  console.log("Resend Verification link function");
+  if(!req.user)
+      return res.redirect("/");
+  
+  const user = await findUserById(req.user.id);
+  if(!user || user.isEmailValid)
+      return res.redirect("/");
+  
+  const randomToken = await generateRandomToken();
+
+  console.log("token in resendVerificationLink in auth.Controller.js is : ",randomToken);
+  await insertVerifyEmailToken(req.user.id,randomToken)
+
+  const verifyEmailLink = await createVerifyEmailLink({email: req.user.email,randomToken});
+
+  sendEmail({
+    to: req.user.email,
+    subject: 'Verify Your Email',
+    html: `
+      <h1>Click the link below to verify your Email</h1>
+      <p>You can use this token : <code>${randomToken}</code></p>
+      <a href="${verifyEmailLink}">Verify Email</a>
+    `
+  }).catch(console.error);
+
+  res.redirect("/verify-email");
+}

@@ -3,11 +3,18 @@ import {
   MILLISECONDS_PER_SECOND,
   REFRESH_TOKEN_EXPIRY,
 } from "../config/constant.js";
-import { eq, and } from "drizzle-orm";
-import { sessionsTable, usersTable } from "../drizzle/schema.js";
+import { eq, and, lt, sql } from "drizzle-orm";
+import {
+  sessionsTable,
+  shortLink,
+  shortLinkRelation,
+  usersTable,
+  verifyEmailTokenTable,
+} from "../drizzle/schema.js";
 import { db } from "./../config/db.js";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 export const getUserByEmail = async ({ email }) => {
   const [user] = await db
@@ -57,17 +64,22 @@ export const verifyJWTToken = (token) => {
 };
 
 export const findSessionById = async (sessionId) => {
-  //? console.log("Session ID is ",sessionId);
+  console.log("Session ID is ", sessionId);
+  //* The sessionId recieved is either a number or an object
   const [session] = await db
     .select()
     .from(sessionsTable)
-    .where(eq(sessionsTable.id, sessionId));
-  //? console.log("The session is ",session);
+    .where(
+      eq(
+        sessionsTable.id,
+        typeof sessionId === "object" ? sessionId.id : sessionId,
+      ),
+    );
   return session;
 };
 
 export const findUserById = async (userId) => {
-  console.log('User ID = ',userId)
+  console.log("findUserById in User ID = ", userId);
   const [user] = await db
     .select()
     .from(usersTable)
@@ -78,7 +90,7 @@ export const findUserById = async (userId) => {
 export const refreshTokens = async (refreshToken) => {
   try {
     const decodedToken = verifyJWTToken(refreshToken);
-    //? console.log(decodedToken);
+    console.log(decodedToken);
     const currentSession = await findSessionById(decodedToken.sessionId);
     //? console.log(currentSession);
 
@@ -87,7 +99,7 @@ export const refreshTokens = async (refreshToken) => {
     }
 
     const user = await findUserById(currentSession.userId);
-    console.log('User is ',user);
+    console.log("User is ", user);
 
     if (!user) {
       throw new error("Invalid User");
@@ -97,28 +109,26 @@ export const refreshTokens = async (refreshToken) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      isEmailValid: user.isEmailValid,
       sessionId: currentSession.id,
     };
 
     const newAccessToken = await createAccessToken(userInfo);
     const newRefreshToken = await createRefreshToken(currentSession.id);
 
-  //? console.log("Getting new access and refresh token for the users",newAccessToken)
-  //? console.log(newRefreshToken)
-    return {newAccessToken,newRefreshToken,userInfo};
-
+    //? console.log("Getting new access and refresh token for the users",newAccessToken)
+    //? console.log(newRefreshToken)
+    return { newAccessToken, newRefreshToken, userInfo };
   } catch (error) {
     console.log(error.message);
   }
 };
 
-export const clearUserSession = async(sessionId)=>{
-  return db.delete(sessionsTable).where(eq(sessionsTable.id,sessionId));
-}
+export const clearUserSession = async (sessionId) => {
+  return db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
+};
 
-
-
-export const authenticateUser = async({req,res,user,name,email})=>{
+export const authenticateUser = async ({ req, res, user, name, email }) => {
   const session = await createSession(user.id, {
     ip: req.clientIp,
     userAgent: req.headers["user-agent"],
@@ -126,18 +136,18 @@ export const authenticateUser = async({req,res,user,name,email})=>{
 
   //?console.log(user);
   req.flash("success", "User Created Successfully");
-    const accessToken = await createAccessToken({
+  const accessToken = await createAccessToken({
     id: user.id,
-    name: user.name||name,
-    email: user.email||email,
+    name: user.name || name,
+    email: user.email || email,
+    isEmailValid: false,
     sessionId: session.id,
   });
   const refreshToken = await createRefreshToken({
     id: session.id,
   });
 
-
-  const baseConfig = { httpOnly: true, secure: true};
+  const baseConfig = { httpOnly: true, secure: true };
   res.cookie("access_token", accessToken, {
     ...baseConfig,
     maxAge: ACCESS_TOKEN_EXPIRY,
@@ -147,4 +157,31 @@ export const authenticateUser = async({req,res,user,name,email})=>{
     ...baseConfig,
     maxAge: REFRESH_TOKEN_EXPIRY,
   });
-}
+};
+
+export const getAllShortLinks = async (Id) => {
+  return await db.select().from(shortLink).where(eq(shortLink.userId, Id));
+};
+
+export const generateRandomToken = async (digit = 8) => {
+  const min = 10 ** (digit - 1);
+  const max = 10 ** digit;
+  return crypto.randomInt(min, max).toString();
+};
+
+export const insertVerifyEmailToken = async (userId, token) => {
+  console.log("TOKEN = ", token);
+  try {
+    await db
+      .delete(verifyEmailTokenTable)
+      .where(lt(verifyEmailTokenTable.expiresAt, sql`CURRENT_TIMESTAMP`));
+    return await db.insert(verifyEmailTokenTable).values({ userId, token });
+  } catch (error) {
+    console.log("Error : ", error.message);
+  }
+};
+
+export const createVerifyEmailLink = async ({ email, token }) => {
+  const uriEncodedEmail = encodeURIComponent(email);
+  return `${process.env.FRONTEND_URL}/verify-email-token?token=${token}&email=${uriEncodedEmail}`;
+};
