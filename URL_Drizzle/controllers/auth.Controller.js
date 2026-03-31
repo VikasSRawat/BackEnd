@@ -1,3 +1,4 @@
+import { safeParse } from "zod";
 import {
   ACCESS_TOKEN_EXPIRY,
   REFRESH_TOKEN_EXPIRY,
@@ -19,10 +20,14 @@ import {
   insertVerifyEmailToken,
   createVerifyEmailLink,
   generateRandomToken,
+  verifyEmailAndUpdate,
+  clearVerifyEmailTokens,
+  findVerificationEmailToken,
 } from "../services/auth.services.js";
 import {
   loginUserSchema,
   registerUserSchema,
+  verifyEmailSchema,
 } from "../validators/auth-validator.js";
 
 export const getRegisterPage = (req, res) => {
@@ -176,4 +181,19 @@ export const resendVerificationLink = async(req,res)=>{
   }).catch(console.error);
 
   res.redirect("/verify-email");
+}
+
+export const verifyEmailToken = async(req,res)=>{
+  const {data,error} = verifyEmailSchema.safeParse(req.query);
+  if(error){
+    return res.send("Verification Link is Invalid or expired. Please enter a correct email link");
+  }
+
+  const token = await findVerificationEmailToken(data);
+  if(!token) res.send("Verification Link is Invalid or expired. Please enter a correct email link");
+  console.log(token);
+  await verifyEmailAndUpdate(token.email);
+
+  clearVerifyEmailTokens(token.email).catch(console.error);
+  return res.redirect("/profile");
 }

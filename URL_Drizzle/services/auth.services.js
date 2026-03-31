@@ -3,7 +3,7 @@ import {
   MILLISECONDS_PER_SECOND,
   REFRESH_TOKEN_EXPIRY,
 } from "../config/constant.js";
-import { eq, and, lt, sql } from "drizzle-orm";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import {
   sessionsTable,
   shortLink,
@@ -171,17 +171,81 @@ export const generateRandomToken = async (digit = 8) => {
 
 export const insertVerifyEmailToken = async (userId, token) => {
   console.log("TOKEN = ", token);
-  try {
-    await db
-      .delete(verifyEmailTokenTable)
-      .where(lt(verifyEmailTokenTable.expiresAt, sql`CURRENT_TIMESTAMP`));
-    return await db.insert(verifyEmailTokenTable).values({ userId, token });
-  } catch (error) {
-    console.log("Error : ", error.message);
-  }
+  await db.transaction(async (tx) => {
+    try {
+      await tx
+        .delete(verifyEmailTokenTable)
+        .where(lt(verifyEmailTokenTable.expiresAt, sql`CURRENT_TIMESTAMP`));
+
+      await tx
+        .delete(verifyEmailTokenTable)
+        .where(eq(verifyEmailTokenTable.userId, userId));
+
+      return await tx.insert(verifyEmailTokenTable).values({ userId, token });
+    } catch (error) {
+      console.log("Error : ", error.message);
+    }
+  });
 };
 
 export const createVerifyEmailLink = async ({ email, token }) => {
-  const uriEncodedEmail = encodeURIComponent(email);
-  return `${process.env.FRONTEND_URL}/verify-email-token?token=${token}&email=${uriEncodedEmail}`;
+  const url = new URL(`http://${process.env.FRONTEND_URL}/verify-email-token`);
+  url.searchParams.append("token", token);
+  url.searchParams.append("email", email);
+  return url.toString();
+};
+
+export const findVerificationEmailToken = async ({ token, email }) => {
+  const tokenData = await db
+    .select({
+      userId: verifyEmailTokenTable.userId,
+      token: verifyEmailTokenTable.token,
+      expiresAt: verifyEmailTokenTable.expiresAt,
+    })
+    .from(verifyEmailTokenTable)
+    .where(
+      and(
+        eq(token, verifyEmailTokenTable.token),
+        gte(verifyEmailTokenTable.expiresAt, sql`CURRENT_TIMESTAMP`),
+      ),
+    );
+
+  if (!tokenData) return null;
+
+  const { userId } = tokenData[0];
+
+  const [userData] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, userId));
+
+  console.log(userData);
+  if (!userData) return null;
+
+  console.log(tokenData);
+
+  return {
+    userId: userData.id,
+    email: userData.email,
+    token: tokenData[0].token,
+    expiresAt: tokenData[0].expiresAt,
+  };
+};
+
+export const verifyEmailAndUpdate = async (email) => {
+  return await db
+    .update(usersTable)
+    .set({ isEmailValid: true })
+    .where(eq(email, usersTable.email));
+};
+
+export const clearVerifyEmailTokens = async (email) => {
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(email, usersTable.email));
+
+  return await db
+    .delete(verifyEmailTokenTable)
+    .where(eq(verifyEmailTokenTable.userId, user.id));
 };
