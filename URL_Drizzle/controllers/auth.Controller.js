@@ -191,9 +191,9 @@ export const verifyEmailToken = async(req,res)=>{
 
   const token = await findVerificationEmailToken(data);
   if(!token) res.send("Verification Link is Invalid or expired. Please enter a correct email link");
-  console.log(token);
-  await verifyEmailAndUpdate(token.email);
+  console.log('Token = ',token);
+  await verifyEmailAndUpdate(token[0].email);
 
-  clearVerifyEmailTokens(token.email).catch(console.error);
+  clearVerifyEmailTokens(token[0].email).catch(console.error);
   return res.redirect("/profile");
 }
