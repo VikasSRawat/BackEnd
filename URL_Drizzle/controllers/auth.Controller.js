@@ -23,11 +23,14 @@ import {
   verifyEmailAndUpdate,
   clearVerifyEmailTokens,
   findVerificationEmailToken,
+  sendNewVerifyEmailLink,
+  udpateName,
 } from "../services/auth.services.js";
 import {
   loginUserSchema,
   registerUserSchema,
   verifyEmailSchema,
+  verifyUserScehma,
 } from "../validators/auth-validator.js";
 
 export const getRegisterPage = (req, res) => {
@@ -108,7 +111,8 @@ export const postRegister = async (req, res) => {
   const [user] = await createUser({ name, email, password: hashedPassword });
 
   await authenticateUser({ req, res, user, name, email });
-  return res.redirect("/");
+  await sendNewVerifyEmailLink({email,userId:user.id});
+  return res.redirect("/verify-email");
 };
 
 export const getMe = (req, res) => {
@@ -163,22 +167,7 @@ export const resendVerificationLink = async(req,res)=>{
   if(!user || user.isEmailValid)
       return res.redirect("/");
   
-  const randomToken = await generateRandomToken();
-
-  console.log("token in resendVerificationLink in auth.Controller.js is : ",randomToken);
-  await insertVerifyEmailToken(req.user.id,randomToken)
-
-  const verifyEmailLink = await createVerifyEmailLink({email: req.user.email,randomToken});
-
-  sendEmail({
-    to: req.user.email,
-    subject: 'Verify Your Email',
-    html: `
-      <h1>Click the link below to verify your Email</h1>
-      <p>You can use this token : <code>${randomToken}</code></p>
-      <a href="${verifyEmailLink}">Verify Email</a>
-    `
-  }).catch(console.error);
+  await sendNewVerifyEmailLink({email: req.user.email,userId: req.user.id});
 
   res.redirect("/verify-email");
 }
@@ -196,4 +185,31 @@ export const verifyEmailToken = async(req,res)=>{
 
   clearVerifyEmailTokens(token[0].email).catch(console.error);
   return res.redirect("/profile");
+}
+
+export const geteEditProfilePage = async(req,res)=>{
+  if(!req.user)
+    return res.redirect("/login")
+  const user = await findUserById(req.user.id);
+  if(!user)
+      return res.redirect("/login");
+  
+  return res.render("../views/auth/edit-profile", { errors: req.flash("errors") , user:user,username:user.name });
+}
+
+export const editProfileName = async(req,res)=>{
+  const user = await findUserById(req.user.id);
+  const { data, error } = verifyUserScehma.safeParse(req.body);
+  if(error){
+    console.log("Error messages are : ",error);
+    req.flash("errors",error)
+    return res.redirect("/edit-profile");
+  }
+  try {
+    await udpateName({email: user.email,name : data.name})
+  } catch (error) {
+    console.log("Error updating the data ",error); 
+  }
+  // req.flash("error",[]); // Store the message in the session
+return res.redirect("/profile");      // Redirect to the new page
 }

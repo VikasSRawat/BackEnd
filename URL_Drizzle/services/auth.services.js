@@ -15,6 +15,12 @@ import { db } from "./../config/db.js";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import path from "path";
+import fs from "fs/promises";
+import ejs from "ejs";
+import mjml2html from "mjml";
+//* import { sendEmail } from "../lib/nodemailer.js"; //* NodeMailer
+import { sendEmail } from "../lib/send-emails.js"; //* Resend
 
 export const getUserByEmail = async ({ email }) => {
   const [user] = await db
@@ -233,7 +239,7 @@ export const createVerifyEmailLink = async ({ email, token }) => {
 // };
 
 export const findVerificationEmailToken = async ({ token, email }) => {
-  return await db
+  const data = await db
     .select({
       userId: usersTable.id,
       email: usersTable.email,
@@ -246,19 +252,21 @@ export const findVerificationEmailToken = async ({ token, email }) => {
         eq(token, verifyEmailTokenTable.token),
         // eq(usersTable.email,email),
         gte(verifyEmailTokenTable.expiresAt, sql`CURRENT_TIMESTAMP`),
-      )
-    ).innerJoin(usersTable,eq(usersTable.id,verifyEmailTokenTable.userId));
+      ),
+    )
+    .innerJoin(usersTable, eq(usersTable.id, verifyEmailTokenTable.userId));
+  return data;
 };
 
 export const verifyEmailAndUpdate = async (email) => {
-  console.log("Email in verifyEmailUpdate = ",email);
+  console.log("Email in verifyEmailUpdate = ", email);
   try {
     return await db
-    .update(usersTable)
-    .set({ isEmailValid: true })
-    .where(eq(email, usersTable.email));
+      .update(usersTable)
+      .set({ isEmailValid: true })
+      .where(eq(email, usersTable.email));
   } catch (error) {
-    console.log("Error has occured ",error);
+    console.log("Error has occured ", error);
     // return res.redirect("/verify-email");
   }
 };
@@ -274,4 +282,48 @@ export const clearVerifyEmailTokens = async (email) => {
     .where(eq(verifyEmailTokenTable.userId, user.id));
 
   // (await db.select().from(usersTable)).join()
+};
+
+export const sendNewVerifyEmailLink = async ({ email, userId }) => {
+  console.log("In sendNewVerifyEmailLink");
+  const randomToken = await generateRandomToken();
+
+  console.log(
+    "token in resendVerificationLink in auth.Controller.js is : ",
+    randomToken,
+  );
+  await insertVerifyEmailToken(userId, randomToken);
+
+  const verifyEmailLink = await createVerifyEmailLink({ email, randomToken });
+
+  //* Getting the mjml template address
+  const mjmlTemplate = await fs.readFile(
+    path.join(import.meta.dirname, "..", "emails", "verify-email.mjml"),
+    "utf-8",
+  );
+  console.log(mjmlTemplate);
+
+  //* For rendering the mjml template with the token and the email
+  const filledTemplate = ejs.render(mjmlTemplate, {
+    code: randomToken,
+    link: verifyEmailLink,
+  });
+
+  //* mjml to html conversion for easier and better output
+  const htmlOutput = mjml2html(filledTemplate).html;
+
+  sendEmail({
+    to: email,
+    subject: "Verify Your Email",
+    html: htmlOutput,
+  }).catch(console.error);
+};
+
+export const udpateName = async ({ email, name }) => {
+  console.log(email);
+  console.log(name);
+  await db
+    .update(usersTable)
+    .set({ name: name })
+    .where(eq(usersTable.email, email));
 };

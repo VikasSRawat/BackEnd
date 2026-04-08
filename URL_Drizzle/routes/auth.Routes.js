@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getLoginPage,getMe,getProfilePage,getRegisterPage,getVerifyEmailPage,logoutUser,postLogin,postRegister, resendVerificationLink, verifyEmailToken } from "../controllers/auth.Controller.js";
+import { editProfileName, geteEditProfilePage, getLoginPage,getMe,getProfilePage,getRegisterPage,getVerifyEmailPage,logoutUser,postLogin,postRegister, resendVerificationLink, verifyEmailToken } from "../controllers/auth.Controller.js";
 
 const router = Router();
 
@@ -22,6 +22,8 @@ router.route("/verify-email-token").get(verifyEmailToken)
 router.route("/me").get(getMe);
 
 router.route("/logout").get(logoutUser);
+
+router.route("/edit-profile").get(geteEditProfilePage).post(editProfileName);
 
 export const authRoute = router;
 
