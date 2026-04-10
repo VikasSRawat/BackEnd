@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { editProfileName, geteEditProfilePage, getLoginPage,getMe,getProfilePage,getRegisterPage,getVerifyEmailPage,logoutUser,postLogin,postRegister, resendVerificationLink, verifyEmailToken } from "../controllers/auth.Controller.js";
+import { changePassowrd, editProfileName, getChangePasswordPage, geteEditProfilePage, getLoginPage,getMe,getProfilePage,getRegisterPage,getVerifyEmailPage,logoutUser,postLogin,postRegister, resendVerificationLink, verifyEmailToken } from "../controllers/auth.Controller.js";
 
 const router = Router();
 
@@ -24,6 +24,8 @@ router.route("/me").get(getMe);
 router.route("/logout").get(logoutUser);
 
 router.route("/edit-profile").get(geteEditProfilePage).post(editProfileName);
+
+router.route("/change-password").get(getChangePasswordPage).post(changePassowrd);
 
 export const authRoute = router;
 

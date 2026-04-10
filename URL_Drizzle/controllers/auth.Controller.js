@@ -25,11 +25,14 @@ import {
   findVerificationEmailToken,
   sendNewVerifyEmailLink,
   udpateName,
+  getPasswordById,
+  updatePassword,
 } from "../services/auth.services.js";
 import {
   loginUserSchema,
   registerUserSchema,
   verifyEmailSchema,
+  verifyPasswordSchema,
   verifyUserScehma,
 } from "../validators/auth-validator.js";
 
@@ -212,4 +215,39 @@ export const editProfileName = async(req,res)=>{
   }
   // req.flash("error",[]); // Store the message in the session
 return res.redirect("/profile");      // Redirect to the new page
+}
+
+export const getChangePasswordPage=async(req,res)=>{
+  if(!req.user)
+      return res.redirect("/login");
+  return res.render("../views/auth/change-password",{errors:req.flash("errors")});
+}
+
+export const changePassowrd=async(req,res)=>{
+  const {data,error} = verifyPasswordSchema.safeParse(req.body);
+  
+  if(error){
+    const errorMessages = error.issues[0].message;
+    req.flash("errors",errorMessages)
+    return res.redirect("/change-password");
+  }
+  
+  const {currentPassword,newPassword} = data;
+  const userId = req.user.id;
+  const oldPassword = await getPasswordById(userId);
+
+  if(!oldPassword){
+    req.flash("errors", "Invalid user");
+    return res.redirect("/login");
+  }
+  const isPasswordValid = await comparePassword(currentPassword,oldPassword);
+  if (!isPasswordValid) {
+    req.flash("errors", "Invalid current Password");
+    return res.redirect("/change-password");
+  }
+
+  const hashedPassword = await hashPasswod(newPassword);
+  await updatePassword({password:hashedPassword,userId});
+  req.flash("success","Password changed successfully");
+  return res.redirect("/profile");
 }

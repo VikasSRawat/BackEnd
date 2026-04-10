@@ -327,3 +327,19 @@ export const udpateName = async ({ email, name }) => {
     .set({ name: name })
     .where(eq(usersTable.email, email));
 };
+
+export const getPasswordById = async (Id) => {
+  const [row] = await db
+    .select({ password: usersTable.password }) // Pass an object!
+    .from(usersTable)
+    .where(eq(usersTable.id, Id));
+
+return row ? row.password : null;
+};
+
+export const updatePassword = async ({ password, userId }) => {
+  await db
+    .update(usersTable)
+    .set({ password: password })
+    .where(eq(usersTable.id, userId));
+};

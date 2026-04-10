@@ -40,3 +40,20 @@ export const verifyEmailSchema = z.object({
 export const verifyUserScehma = z.object({
   name: nameSchema,
 });
+
+export const verifyPasswordSchema = z.object({
+  currentPassword: z
+    .string()
+    .min(1, { message: "Please Enter your current password" }),
+  newPassword: z
+    .string()
+    .min(3, { message: "The new password must be atleast 3 characters long" })
+    .max(100, "New password cannot be longer than 100 characters"),
+  confirmPassword: z
+    .string()
+    .min(3, { message: "confirmed password must be atleast 3 characters long" })
+    .max(100, "New password cannot be longer than 100 characters"),
+}).refine((data)=>data.newPassword == data.confirmPassword,{
+    message: "Passwords Don't match",
+    path : ["confirmPassword"], //* Errors will be associated with the confirmPassword field
+});
