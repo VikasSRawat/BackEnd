@@ -22,6 +22,20 @@
       "when": 1774863082703,
       "tag": "0002_nostalgic_tiger_shark",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1776064333626,
+      "tag": "0003_curved_captain_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1776153798047,
+      "tag": "0004_sparkling_agent_brand",
+      "breakpoints": true
     }
   ]
 }

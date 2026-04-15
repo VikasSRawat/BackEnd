@@ -27,14 +27,18 @@ import {
   udpateName,
   getPasswordById,
   updatePassword,
+  findUserByEmail,
+  createResetPasswordLink,
 } from "../services/auth.services.js";
 import {
+  forgotPasswordSchema,
   loginUserSchema,
   registerUserSchema,
   verifyEmailSchema,
   verifyPasswordSchema,
   verifyUserScehma,
 } from "../validators/auth-validator.js";
+import { getHtmlFromMjmlTemplate } from "../lib/get-HTML-template.js";
 
 export const getRegisterPage = (req, res) => {
   if (req.user) return res.redirect("/");
@@ -250,4 +254,32 @@ export const changePassowrd=async(req,res)=>{
   await updatePassword({password:hashedPassword,userId});
   req.flash("success","Password changed successfully");
   return res.redirect("/profile");
+}
+
+export const getForgotPasswordPage = async(req,res)=>{
+  return res.render("../views/auth/forgot-password",{formSubmitted: req.flash("formSubmitted")[0],errors:req.flash("errors")});
+}
+
+export const postForgotPassword = async(req,res)=>{
+  const {data,error} = forgotPasswordSchema.safeParse(req.body);
+  if(error){
+    console.log("Error ",error);
+    const errorMessages = error.issues[0].message;
+    req.flash("errors",errorMessages)
+    return res.redirect("/reset-password");
+  }
+  
+  const {email} = data;
+  
+  const user = await findUserByEmail(email);
+  if(user){
+    const resetPasswordLink = await createResetPasswordLink(user.id);
+    // console.log(resetPasswordLink);
+    const html = await getHtmlFromMjmlTemplate("reset-password-email",{
+      name: user.name,
+      link: resetPasswordLink
+    })
+    console.log(html);
+  }
+  return res.redirect("/login");
 }

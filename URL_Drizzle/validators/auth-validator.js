@@ -57,3 +57,12 @@ export const verifyPasswordSchema = z.object({
     message: "Passwords Don't match",
     path : ["confirmPassword"], //* Errors will be associated with the confirmPassword field
 });
+
+
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email({ message: "Enter a valid email address" })
+    .max(100, { message: "Email can be at max 100 characters long" })
+});

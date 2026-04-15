@@ -5,6 +5,7 @@ import {
 } from "../config/constant.js";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
 import {
+  passwordResetTokensTable,
   sessionsTable,
   shortLink,
   shortLinkRelation,
@@ -21,6 +22,7 @@ import ejs from "ejs";
 import mjml2html from "mjml";
 //* import { sendEmail } from "../lib/nodemailer.js"; //* NodeMailer
 import { sendEmail } from "../lib/send-emails.js"; //* Resend
+// import 'dotenv/config';
 
 export const getUserByEmail = async ({ email }) => {
   const [user] = await db
@@ -342,4 +344,29 @@ export const updatePassword = async ({ password, userId }) => {
     .update(usersTable)
     .set({ password: password })
     .where(eq(usersTable.id, userId));
+};
+
+export const findUserByEmail = async(email)=>{
+  const [data] = await db.select().from(usersTable).where(eq(usersTable.email,email));
+  return data;
+}
+
+export const clearResetPasswordTokens = async(userId)=>{
+  await db.delete(passwordResetTokensTable).where(eq(userId,passwordResetTokensTable.userId))
+}
+
+export const insertResetPasswordTokens = async({userId,token})=>{
+  
+  await db.insert(passwordResetTokensTable).values({userId,tokenHash:token});
+}
+
+export const createResetPasswordLink = async(userId)=>{
+  const randomToken = crypto.randomBytes(32).toString("hex");
+  const hashedToken = crypto.createHash("sha256").update(randomToken).digest("hex");
+  await clearResetPasswordTokens(userId);
+  await insertResetPasswordTokens({userId,token:hashedToken});
+
+  const link = `http://${process.env.FRONTEND_URL}/reset-password/${randomToken}`;
+  // console.log(link);
+  return link;
 };

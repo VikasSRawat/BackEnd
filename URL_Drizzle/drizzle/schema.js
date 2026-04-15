@@ -19,6 +19,14 @@ export const verifyEmailTokenTable = mysqlTable("is_email_valid",{
     createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
+export const passwordResetTokensTable = mysqlTable("password_reset_tokens",{
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("user_id").notNull().references(()=>usersTable.id, {onDelete:"cascade"}),
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: timestamp("expires_at").default(sql`(CURRENT_TIMESTAMP + INTERVAL 1 HOUR)`).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull()
+})
+
 export const shortLink = mysqlTable("short_link",{
     id: int().autoincrement().primaryKey(),
     url: varchar({length:255}).notNull(),
@@ -64,3 +72,5 @@ export const sessionsRelation = relations(sessionsTable,(params)=>({
         references:[usersTable.id] //* which table it references to
     })
 }))
+
+
