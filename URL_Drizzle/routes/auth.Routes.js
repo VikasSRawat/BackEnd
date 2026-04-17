@@ -9,12 +9,15 @@ import {
   getMe,
   getProfilePage,
   getRegisterPage,
+  getResetPasswordPage,
   getVerifyEmailPage,
+  getWrongResetPasswordToken,
   logoutUser,
   postForgotPassword,
   postLogin,
   postRegister,
   resendVerificationLink,
+  resetPassword,
   verifyEmailToken,
 } from "../controllers/auth.Controller.js";
 
@@ -52,4 +55,7 @@ router
   .get(getForgotPasswordPage)
   .post(postForgotPassword);
 
+router.route("/reset-password/:token").get(getResetPasswordPage).post(resetPassword);
+
+router.route("wrong-reset-password-token").get(getWrongResetPasswordToken);
 export const authRoute = router;

@@ -336,37 +336,65 @@ export const getPasswordById = async (Id) => {
     .from(usersTable)
     .where(eq(usersTable.id, Id));
 
-return row ? row.password : null;
+  return row ? row.password : null;
 };
 
 export const updatePassword = async ({ password, userId }) => {
-  await db
+  try {
+    return await db
     .update(usersTable)
     .set({ password: password })
     .where(eq(usersTable.id, userId));
+  } catch (error) {
+    console.error("error in setting password ",error);
+  }
 };
 
-export const findUserByEmail = async(email)=>{
-  const [data] = await db.select().from(usersTable).where(eq(usersTable.email,email));
+export const findUserByEmail = async (email) => {
+  const [data] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.email, email));
   return data;
-}
+};
 
-export const clearResetPasswordTokens = async(userId)=>{
-  await db.delete(passwordResetTokensTable).where(eq(userId,passwordResetTokensTable.userId))
-}
+export const clearResetPasswordTokens = async (userId) => {
+  return await db
+    .delete(passwordResetTokensTable)
+    .where(eq(userId, passwordResetTokensTable.userId));
+};
 
-export const insertResetPasswordTokens = async({userId,token})=>{
-  
-  await db.insert(passwordResetTokensTable).values({userId,tokenHash:token});
-}
+export const insertResetPasswordTokens = async ({ userId, token }) => {
+  await db
+    .insert(passwordResetTokensTable)
+    .values({ userId, tokenHash: token });
+};
 
-export const createResetPasswordLink = async(userId)=>{
+export const createResetPasswordLink = async (userId) => {
   const randomToken = crypto.randomBytes(32).toString("hex");
-  const hashedToken = crypto.createHash("sha256").update(randomToken).digest("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(randomToken)
+    .digest("hex");
   await clearResetPasswordTokens(userId);
-  await insertResetPasswordTokens({userId,token:hashedToken});
+  await insertResetPasswordTokens({ userId, token: hashedToken });
 
   const link = `http://${process.env.FRONTEND_URL}/reset-password/${randomToken}`;
   // console.log(link);
   return link;
+};
+
+export const getResetPasswordToken = async (token) => {
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  const [data] = await db
+    .select()
+    .from(passwordResetTokensTable)
+    .where(
+      and(
+        eq(tokenHash, passwordResetTokensTable.tokenHash),
+        gte(passwordResetTokensTable.expiresAt, sql`CURRENT_TIMESTAMP`),
+      ),
+    );
+
+  return data;
 };

@@ -3,7 +3,7 @@ import {
   ACCESS_TOKEN_EXPIRY,
   REFRESH_TOKEN_EXPIRY,
 } from "../config/constant.js";
-import { sendEmail } from "../lib/nodemailer.js";
+import { sendEmail } from "../lib/send-emails.js";
 import {
   //   generateToken,
   createSession,
@@ -29,11 +29,14 @@ import {
   updatePassword,
   findUserByEmail,
   createResetPasswordLink,
+  getResetPasswordToken,
+  clearResetPasswordTokens,
 } from "../services/auth.services.js";
 import {
   forgotPasswordSchema,
   loginUserSchema,
   registerUserSchema,
+  resetPasswordSchema,
   verifyEmailSchema,
   verifyPasswordSchema,
   verifyUserScehma,
@@ -118,7 +121,7 @@ export const postRegister = async (req, res) => {
   const [user] = await createUser({ name, email, password: hashedPassword });
 
   await authenticateUser({ req, res, user, name, email });
-  await sendNewVerifyEmailLink({email,userId:user.id});
+  await sendNewVerifyEmailLink({ email, userId: user.id });
   return res.redirect("/verify-email");
 };
 
@@ -156,130 +159,182 @@ export const getProfilePage = async (req, res) => {
   });
 };
 
+export const getVerifyEmailPage = async (req, res) => {
+  if (!req.user || req.user.isEmailValid) return res.redirect("/");
 
-export const getVerifyEmailPage = async(req,res)=>{
-  if(!req.user || req.user.isEmailValid) return res.redirect("/");
+  return res.render("../views/auth/verify-email.ejs", {
+    email: req.user.email,
+  });
+};
 
-  return res.render("../views/auth/verify-email.ejs",{
-    email: req.user.email
-  })
-}
-
-export const resendVerificationLink = async(req,res)=>{
+export const resendVerificationLink = async (req, res) => {
   console.log("Resend Verification link function");
-  if(!req.user)
-      return res.redirect("/");
-  
+  if (!req.user) return res.redirect("/");
+
   const user = await findUserById(req.user.id);
-  if(!user || user.isEmailValid)
-      return res.redirect("/");
-  
-  await sendNewVerifyEmailLink({email: req.user.email,userId: req.user.id});
+  if (!user || user.isEmailValid) return res.redirect("/");
+
+  await sendNewVerifyEmailLink({ email: req.user.email, userId: req.user.id });
 
   res.redirect("/verify-email");
-}
+};
 
-export const verifyEmailToken = async(req,res)=>{
-  const {data,error} = verifyEmailSchema.safeParse(req.query);
-  if(error){
-    return res.send("Verification Link is Invalid or expired. Please enter a correct email link");
+export const verifyEmailToken = async (req, res) => {
+  const { data, error } = verifyEmailSchema.safeParse(req.query);
+  if (error) {
+    return res.send(
+      "Verification Link is Invalid or expired. Please enter a correct email link",
+    );
   }
 
   const token = await findVerificationEmailToken(data);
-  if(!token) res.send("Verification Link is Invalid or expired. Please enter a correct email link");
-  console.log('Token = ',token);
+  if (!token)
+    res.send(
+      "Verification Link is Invalid or expired. Please enter a correct email link",
+    );
+  console.log("Token = ", token);
   await verifyEmailAndUpdate(token[0].email);
 
   clearVerifyEmailTokens(token[0].email).catch(console.error);
   return res.redirect("/profile");
-}
+};
 
-export const geteEditProfilePage = async(req,res)=>{
-  if(!req.user)
-    return res.redirect("/login")
+export const geteEditProfilePage = async (req, res) => {
+  if (!req.user) return res.redirect("/login");
   const user = await findUserById(req.user.id);
-  if(!user)
-      return res.redirect("/login");
-  
-  return res.render("../views/auth/edit-profile", { errors: req.flash("errors") , user:user,username:user.name });
-}
+  if (!user) return res.redirect("/login");
 
-export const editProfileName = async(req,res)=>{
+  return res.render("../views/auth/edit-profile", {
+    errors: req.flash("errors"),
+    user: user,
+    username: user.name,
+  });
+};
+
+export const editProfileName = async (req, res) => {
   const user = await findUserById(req.user.id);
   const { data, error } = verifyUserScehma.safeParse(req.body);
-  if(error){
-    console.log("Error messages are : ",error);
-    req.flash("errors",error)
+  if (error) {
+    console.log("Error messages are : ", error);
+    req.flash("errors", error);
     return res.redirect("/edit-profile");
   }
   try {
-    await udpateName({email: user.email,name : data.name})
+    await udpateName({ email: user.email, name: data.name });
   } catch (error) {
-    console.log("Error updating the data ",error); 
+    console.log("Error updating the data ", error);
   }
   // req.flash("error",[]); // Store the message in the session
-return res.redirect("/profile");      // Redirect to the new page
-}
+  return res.redirect("/profile"); // Redirect to the new page
+};
 
-export const getChangePasswordPage=async(req,res)=>{
-  if(!req.user)
-      return res.redirect("/login");
-  return res.render("../views/auth/change-password",{errors:req.flash("errors")});
-}
+export const getChangePasswordPage = async (req, res) => {
+  if (!req.user) return res.redirect("/login");
+  return res.render("../views/auth/change-password", {
+    errors: req.flash("errors"),
+  });
+};
 
-export const changePassowrd=async(req,res)=>{
-  const {data,error} = verifyPasswordSchema.safeParse(req.body);
-  
-  if(error){
+export const changePassowrd = async (req, res) => {
+  const { data, error } = verifyPasswordSchema.safeParse(req.body);
+
+  if (error) {
     const errorMessages = error.issues[0].message;
-    req.flash("errors",errorMessages)
+    req.flash("errors", errorMessages);
     return res.redirect("/change-password");
   }
-  
-  const {currentPassword,newPassword} = data;
+
+  const { currentPassword, newPassword } = data;
   const userId = req.user.id;
   const oldPassword = await getPasswordById(userId);
 
-  if(!oldPassword){
+  if (!oldPassword) {
     req.flash("errors", "Invalid user");
     return res.redirect("/login");
   }
-  const isPasswordValid = await comparePassword(currentPassword,oldPassword);
+  const isPasswordValid = await comparePassword(currentPassword, oldPassword);
   if (!isPasswordValid) {
     req.flash("errors", "Invalid current Password");
     return res.redirect("/change-password");
   }
 
   const hashedPassword = await hashPasswod(newPassword);
-  await updatePassword({password:hashedPassword,userId});
-  req.flash("success","Password changed successfully");
+  await updatePassword({ password: hashedPassword, userId });
+  req.flash("success", "Password changed successfully");
   return res.redirect("/profile");
-}
+};
 
-export const getForgotPasswordPage = async(req,res)=>{
-  return res.render("../views/auth/forgot-password",{formSubmitted: req.flash("formSubmitted")[0],errors:req.flash("errors")});
-}
+export const getForgotPasswordPage = async (req, res) => {
+  console.log("Getting forgot password page");
+  return res.render("../views/auth/forgot-password", {
+    formSubmitted: req.flash("formSubmitted")[0],
+    errors: req.flash("errors"),
+  });
+};
 
-export const postForgotPassword = async(req,res)=>{
-  const {data,error} = forgotPasswordSchema.safeParse(req.body);
-  if(error){
-    console.log("Error ",error);
+export const postForgotPassword = async (req, res) => {
+  const { data, error } = forgotPasswordSchema.safeParse(req.body);
+  if (error) {
+    console.log("Error ", error);
     const errorMessages = error.issues[0].message;
-    req.flash("errors",errorMessages)
+    req.flash("errors", errorMessages);
     return res.redirect("/reset-password");
   }
-  
-  const {email} = data;
-  
+
+  const { email } = data;
+
   const user = await findUserByEmail(email);
-  if(user){
+  if (user) {
     const resetPasswordLink = await createResetPasswordLink(user.id);
     // console.log(resetPasswordLink);
-    const html = await getHtmlFromMjmlTemplate("reset-password-email",{
+    const html = await getHtmlFromMjmlTemplate("reset-password-email", {
       name: user.name,
-      link: resetPasswordLink
-    })
-    console.log(html);
+      link: resetPasswordLink,
+    });
+    sendEmail({
+      to: email,
+      subject: "Reset Your password",
+      html: html,
+    }).catch((error) => {
+      console.log(error);
+    });
+    // console.log(html);
   }
+  return res.redirect("/reset-password");
+};
+
+export const getResetPasswordPage = async (req, res) => {
+  const { token } = req.params;
+  console.log("The token is ",token);
+  const value = await getResetPasswordToken(token);
+  if (!value) return res.redirect("auth/wrong-reset-password-token");
+  console.log("The value is ",value);
+  return res.render("auth/reset-password", {
+    formSubmitted: req.flash("formSubmitted")[0],
+    errors: req.flash("errors"),
+    token:token,
+  });
+};
+
+export const resetPassword = async(req,res)=>{
+  const { token } = req.params;
+  const value = await getResetPasswordToken(token);
+  if (!value) return res.redirect("auth/wrong-reset-password-token");
+  const {data,error} = resetPasswordSchema.safeParse(req.body);
+  if(error){
+    console.log("Error ", error);
+    const errorMessages = error.issues[0].message;
+    req.flash("errors", errorMessages);
+    return res.redirect("/reset-password");
+  }
+  const {newPassword} = data;
+  const user = await findUserById(value.userId);
+  await clearResetPasswordTokens(user.id);
+  const password = await hashPasswod(newPassword);
+  await updatePassword({password,userId:user.id});
   return res.redirect("/login");
+}
+
+export const getWrongResetPasswordToken = async(req,res)=>{
+  return res.render("../views/auth/wrong-reset-password-token");
 }
