@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campaign List</title>
+  </head>
+  <body>
+    <h1>Here is the list</h1>
+    <ul id="campaign-container"></ul>
+    <div>
+      <button id="prev-btn">prev</button>
+      <span id="page-indicator">page 1</span>
+      <button id="next-btn">next</button>
+    </div>
+
+    <script>
+      let currentPage = 1;
+      const container = document.getElementById("campaign-container");
+      const nextBtn = document.getElementById("next-btn");
+      const prevBtn = document.getElementById("prev-btn");
+      const pageIndicator = document.getElementById("page-indicator");
+
+      async function fetchCampaigns(page) {
+        try {
+          const response = await fetch(`/campaign/flip?page=${page}`);
+          const campaigns = await response.json();
+          
+          container.innerHTML = "";
+          if (campaigns.length === 0) {
+            container.innerHTML = "<li>No more campaigns found</li>";
+            return;
+          }
+
+          campaigns.forEach((camp) => {
+            const li = document.createElement("li");
+            li.textContent = `${camp.name} (${camp.email})`;
+            container.appendChild(li);
+          });
+
+          pageIndicator.textContent = `Page ${currentPage}`;
+          prevBtn.disabled = currentPage === 1;
+        } catch (error) {
+          console.error("Failed to fetch campaigns:", error);
+        }
+      }
+
+      nextBtn.addEventListener("click", () => {
+        currentPage++;
+        fetchCampaigns(currentPage);
+      });
+
+      prevBtn.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          fetchCampaigns(currentPage);
+        }
+      });
+      fetchCampaigns(currentPage);
+    </script>
+  </body>
+</html>
