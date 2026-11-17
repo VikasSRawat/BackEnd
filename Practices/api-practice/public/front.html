@@ -27,6 +27,7 @@
           const campaigns = await response.json();
           
           container.innerHTML = "";
+          nextBtn.disabled = campaigns.length === 0;
           if (campaigns.length === 0) {
             container.innerHTML = "<li>No more campaigns found</li>";
             return;
