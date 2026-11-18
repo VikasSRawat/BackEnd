@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <ul id="container"></ul>
+
+    <button id="prev-btn">prev</button>
+    <div id="pageNo">Page 1</div>
+    <button id="next-btn">next</button>
+  </body>
+  <script>
+    let currentPage = 1;
+    const prev = document.getElementById("prev-btn");
+    const next = document.getElementById("next-btn");
+    const pageNo = document.getElementById("pageNo");
+    const container = document.getElementById("container");
+
+    async function fetchCampaigns(page) {
+      try {
+        const response = await fetch(`/campaigns?page=${page}`)
+        const campaign = await response.json();
+        container.innerHTML = "";
+        next.disabled = campaign.length === 0;
+        if(campaign.length === 0){
+            container.innerHTML = "<li>No more campaigns found</li>";
+            return;
+        }
+        campaign.forEach(element => {
+            const li = document.createElement("li");
+            li.textContent = `ID: ${element.id} | ${element.name} | ${element.email}`;;
+            container.appendChild(li);
+        });
+        pageNo.innerHTML = `Page ${currentPage}`;
+        prev.disabled = currentPage === 1;
+      } catch (error) {
+        console.error(error);
+        return res.send(
+          "Sorry an internal error has occured, go fuck yourself",
+        );
+      }
+
+      next.addEventListener("click",()=>{
+        currentPage++;
+        fetchCampaigns(currentPage);
+      })
+      prev.addEventListener("click",()=>{
+        if(currentPage > 1){
+            currentPage--;
+            fetchCampaigns(currentPage);
+        }
+      })
+      
+    }
+
+    fetchCampaigns(currentPage);
+  </script>
+</html>
