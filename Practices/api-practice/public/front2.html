@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cursor pagination</title>
+  </head>
+  <body>
+    <ul class="container"></ul>
+    <button class="load">Load more</button>
+  </body>
+  <script>
+    const load = document.getElementById("load");
+    const container = document.getElementById("container");
+    let cursor = 1;
+    let limit = 10;
+    async function fetchCampaigns(cursor, limit) {
+      try {
+        const respose = await fetch(`http://localhost:3020/campaigns?cursor=${cursor}&limit=${limit}`);
+        const campaign = await respose.json();
+        if(campaign.length === 0)
+            return;
+        campaign.forEach(camp => {
+            const li = document.createElement("li");
+            li.innerHTML = `id: ${camp.id}   name:${name}, email: ${email}`;
+            container.appendChild(li);
+        });
+        cursor = cursor + campaign.length;
+      } catch (error) {
+        console.log("An Error has occured", error);
+        return res.send("Hi sorry an internal error has occured");
+      }
+    }
+    fetchCampain(cursor, limit);
+    load.addEventListener("click",(req,res)=>{
+        fetchCampain(cursor, limit);
+    })
+  </script>
+</html>
