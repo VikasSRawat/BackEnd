@@ -6,34 +6,44 @@
     <title>cursor pagination</title>
   </head>
   <body>
-    <ul class="container"></ul>
-    <button class="load">Load more</button>
+    <h1>These are the campaigns</h1>
+    <ul id="container"></ul>
+    <button id="load">Load more</button>
   </body>
   <script>
     const load = document.getElementById("load");
     const container = document.getElementById("container");
-    let cursor = 1;
-    let limit = 10;
+    let Cursor = 0;
+    let Limit = 10;
+
     async function fetchCampaigns(cursor, limit) {
       try {
-        const respose = await fetch(`http://localhost:3020/campaigns?cursor=${cursor}&limit=${limit}`);
-        const campaign = await respose.json();
-        if(campaign.length === 0)
-            return;
-        campaign.forEach(camp => {
-            const li = document.createElement("li");
-            li.innerHTML = `id: ${camp.id}   name:${name}, email: ${email}`;
-            container.appendChild(li);
+        const response = await fetch(`http://localhost:3020/campaigns?cursor=${cursor}&limit=${limit}`);
+        const campaign = await response.json();
+
+        if (campaign.length === 0) {
+          load.disabled = true;
+          load.textContent = "No more campaigns";
+          return;
+        }
+
+        campaign.forEach((camp) => {
+          const li = document.createElement("li");
+          li.textContent = `id: ${camp.id} | name: ${camp.name}, email: ${camp.email}`;
+          container.appendChild(li);
         });
-        cursor = cursor + campaign.length;
+
+        Cursor = Cursor + campaign.length;
       } catch (error) {
         console.log("An Error has occured", error);
-        return res.send("Hi sorry an internal error has occured");
       }
     }
-    fetchCampain(cursor, limit);
-    load.addEventListener("click",(req,res)=>{
-        fetchCampain(cursor, limit);
-    })
+
+    fetchCampaigns(Cursor, Limit);
+
+    load.addEventListener("click", () => {
+      console.log("Hi clicking the button");
+      fetchCampaigns(Cursor, Limit);
+    });
   </script>
 </html>

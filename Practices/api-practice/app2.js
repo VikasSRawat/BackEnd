@@ -6,7 +6,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT||3003
-app.use(cors);
+app.use(cors());
 
 const campaigns = Array.from({ length: 40 }, (_, i) => ({
     id: i + 1,
@@ -20,6 +20,7 @@ app.get("/",(req,res)=>{
 })
 
 app.get("/campaigns",(req,res)=>{
+    console.log("Hi clicking the button");
     const cursor = parseInt(req.query.cursor);
     const limit = parseInt(req.query.limit);
     console.log(cursor);
